@@ -199,7 +199,7 @@ const AUDIO={
 /* =====================================================================
    선생님 수정 구역 / TEACHER EDIT ZONE
    - 11~20과는 빈 칸(draft)만 만들어 둔 상태입니다. 본문(sentences)·단어(vocab)·퀴즈(quiz)를 채우면 활성화됩니다.
-   - 연습문제가 있는 과(짝수과)는 exercise:[...] 를 채우면 '연습' 탭이 나타납니다. 없으면 탭이 숨겨집니다.
+   - 연습문제가 있는 과(짝수과)는 를 채우면 '연습' 탭이 나타납니다. 없으면 탭이 숨겨집니다.
    - 문답처럼 두 줄짜리 카드는 zh/py/뜻 안에 줄바꿈(\n)을 넣습니다. 첫 줄=질문, 둘째 줄=대답.
    - 카드 하나(문장 또는 문답 하나)가 통과 단위입니다. (g 숫자는 원래 음성 파일 번호 표시용이며 통과 계산에는 쓰지 않습니다.)
    - threshold: 자동 점수 통과 기준(%) / 초급은 낮게, 중급은 높게
@@ -271,7 +271,7 @@ const LESSONS = [
 /* 11~20과 빈 칸: 본문(sentences)·단어(vocab)·퀴즈(quiz)를 채우면 자동으로 활성화됩니다. (문화는 이 앱에서 다루지 않습니다) */
 for(let n=11;n<=20;n++){
   LESSONS.splice(n-11,0,{id:'l'+n, title:n+'과', level:'', threshold:60, draft:true,
-    sentences:[], exercise:[], vocab:[], culture:{title:'',text:'',links:[],prompt:''}, quiz:[]});
+    sentences:[],  vocab:[], culture:{title:'',text:'',links:[],prompt:''}, quiz:[]});
 }
 
 /* 11과: au = 원어민 MP3 id(AUDIO 안). 없으면 폰 TTS로 재생됩니다. */
@@ -304,184 +304,183 @@ Object.assign(LESSONS.find(l=>l.id==='l11'),{draft:false, sentences:[
 ]});
 /* 12과: 본문 8문답, 연습 8문답 (카드 하나 = 통과 단위) */
 Object.assign(LESSONS.find(l=>l.id==='l12'),{draft:false, sentences:[
- {
-  "zh": "他有弟弟吗？\n他有一个弟弟。",
-  "py": "Tā yǒu dìdi ma?\nTā yǒu yí ge dìdi.",
-  "ko": "그는 남동생이 있어요?\n그는 남동생이 한 명 있어요.",
-  "en": "Does he have a younger brother?\nHe has one younger brother.",
-  "vi": "Anh ấy có em trai không?\nAnh ấy có một em trai.",
-  "mn": "Тэр дүү хүүтэй юу?\nТэр нэг дүү хүүтэй.",
-  "ja": "彼には弟がいますか？\n彼には弟が一人います。",
+{
+  "zh": "他有弟弟吗？",
+  "py": "Tā yǒu dìdi ma?",
+  "ko": "그는 남동생이 있어요?",
+  "en": "Does he have a younger brother?",
+  "vi": "Anh ấy có em trai không?",
+  "mn": "Тэр дүү хүүтэй юу?",
+  "ja": "彼には弟がいますか？",
   "au": "12-s1",
   "g": 1
  },
- {
-  "zh": "他有几个弟弟？\n他有一个弟弟。",
-  "py": "Tā yǒu jǐ ge dìdi?\nTā yǒu yí ge dìdi.",
-  "ko": "그는 남동생이 몇 명 있어요?\n그는 남동생이 한 명 있어요.",
-  "en": "How many younger brothers does he have?\nHe has one younger brother.",
-  "vi": "Anh ấy có mấy em trai?\nAnh ấy có một em trai.",
-  "mn": "Тэр хэдэн дүү хүүтэй вэ?\nТэр нэг дүү хүүтэй.",
-  "ja": "彼には弟が何人いますか？\n彼には弟が一人います。",
+{
+  "zh": "他有一个弟弟。",
+  "py": "Tā yǒu yí ge dìdi.",
+  "ko": "그는 남동생이 한 명 있어요.",
+  "en": "He has one younger brother.",
+  "vi": "Anh ấy có một em trai.",
+  "mn": "Тэр нэг дүү хүүтэй.",
+  "ja": "彼には弟が一人います。",
+  "au": "12-s1",
+  "g": 1
+ },
+{
+  "zh": "他有几个弟弟？",
+  "py": "Tā yǒu jǐ ge dìdi?",
+  "ko": "그는 남동생이 몇 명 있어요?",
+  "en": "How many younger brothers does he have?",
+  "vi": "Anh ấy có mấy em trai?",
+  "mn": "Тэр хэдэн дүү хүүтэй вэ?",
+  "ja": "彼には弟が何人いますか？",
   "au": "12-s2",
   "g": 1
  },
- {
-  "zh": "他有没有妹妹？\n他有妹妹。",
-  "py": "Tā yǒu méiyǒu mèimei?\nTā yǒu mèimei.",
-  "ko": "그는 여동생이 있어요, 없어요?\n그는 여동생이 있어요.",
-  "en": "Does he have a younger sister?\nHe has a younger sister.",
-  "vi": "Anh ấy có em gái không?\nAnh ấy có em gái.",
-  "mn": "Тэр дүү охинтой юу?\nТэр дүү охинтой.",
-  "ja": "彼には妹がいますか？\n彼には妹がいます。",
+{
+  "zh": "他有一个弟弟。",
+  "py": "Tā yǒu yí ge dìdi.",
+  "ko": "그는 남동생이 한 명 있어요.",
+  "en": "He has one younger brother.",
+  "vi": "Anh ấy có một em trai.",
+  "mn": "Тэр нэг дүү хүүтэй.",
+  "ja": "彼には弟が一人います。",
+  "au": "12-s2",
+  "g": 1
+ },
+{
+  "zh": "他有没有妹妹？",
+  "py": "Tā yǒu méiyǒu mèimei?",
+  "ko": "그는 여동생이 있어요, 없어요?",
+  "en": "Does he have a younger sister?",
+  "vi": "Anh ấy có em gái không?",
+  "mn": "Тэр дүү охинтой юу?",
+  "ja": "彼には妹がいますか？",
   "au": "12-s3",
   "g": 2
  },
- {
-  "zh": "他有几个妹妹？\n他有两个妹妹。",
-  "py": "Tā yǒu jǐ ge mèimei?\nTā yǒu liǎng ge mèimei.",
-  "ko": "그는 여동생이 몇 명 있어요?\n그는 여동생이 두 명 있어요.",
-  "en": "How many younger sisters does he have?\nHe has two younger sisters.",
-  "vi": "Anh ấy có mấy em gái?\nAnh ấy có hai em gái.",
-  "mn": "Тэр хэдэн дүү охинтой вэ?\nТэр хоёр дүү охинтой.",
-  "ja": "彼には妹が何人いますか？\n彼には妹が二人います。",
+{
+  "zh": "他有妹妹。",
+  "py": "Tā yǒu mèimei.",
+  "ko": "그는 여동생이 있어요.",
+  "en": "He has a younger sister.",
+  "vi": "Anh ấy có em gái.",
+  "mn": "Тэр дүү охинтой.",
+  "ja": "彼には妹がいます。",
+  "au": "12-s3",
+  "g": 2
+ },
+{
+  "zh": "他有几个妹妹？",
+  "py": "Tā yǒu jǐ ge mèimei?",
+  "ko": "그는 여동생이 몇 명 있어요?",
+  "en": "How many younger sisters does he have?",
+  "vi": "Anh ấy có mấy em gái?",
+  "mn": "Тэр хэдэн дүү охинтой вэ?",
+  "ja": "彼には妹が何人いますか？",
   "au": "12-s4",
   "g": 2
  },
- {
-  "zh": "她有没有哥哥？\n她没有哥哥。",
-  "py": "Tā yǒu méiyǒu gēge?\nTā méiyǒu gēge.",
-  "ko": "그녀는 오빠가 있어요, 없어요?\n그녀는 오빠가 없어요.",
-  "en": "Does she have an older brother?\nShe does not have an older brother.",
-  "vi": "Cô ấy có anh trai không?\nCô ấy không có anh trai.",
-  "mn": "Тэр ахтай юу?\nТэр ахгүй.",
-  "ja": "彼女には兄がいますか？\n彼女には兄がいません。",
+{
+  "zh": "他有两个妹妹。",
+  "py": "Tā yǒu liǎng ge mèimei.",
+  "ko": "그는 여동생이 두 명 있어요.",
+  "en": "He has two younger sisters.",
+  "vi": "Anh ấy có hai em gái.",
+  "mn": "Тэр хоёр дүү охинтой.",
+  "ja": "彼には妹が二人います。",
+  "au": "12-s4",
+  "g": 2
+ },
+{
+  "zh": "她有没有哥哥？",
+  "py": "Tā yǒu méiyǒu gēge?",
+  "ko": "그녀는 오빠가 있어요, 없어요?",
+  "en": "Does she have an older brother?",
+  "vi": "Cô ấy có anh trai không?",
+  "mn": "Тэр ахтай юу?",
+  "ja": "彼女には兄がいますか？",
   "au": "12-s5",
   "g": 3
  },
- {
-  "zh": "她姐姐有没有男朋友？\n她姐姐没有男朋友。",
-  "py": "Tā jiějie yǒu méiyǒu nánpéngyou?\nTā jiějie méiyǒu nánpéngyou.",
-  "ko": "그녀의 언니는 남자친구가 있어요, 없어요?\n그녀의 언니는 남자친구가 없어요.",
-  "en": "Does her older sister have a boyfriend?\nHer older sister does not have a boyfriend.",
-  "vi": "Chị gái cô ấy có bạn trai không?\nChị gái cô ấy không có bạn trai.",
-  "mn": "Түүний эгч найз залуутай юу?\nТүүний эгч найз залуугүй.",
-  "ja": "彼女のお姉さんには彼氏がいますか？\n彼女のお姉さんには彼氏がいません。",
+{
+  "zh": "她没有哥哥。",
+  "py": "Tā méiyǒu gēge.",
+  "ko": "그녀는 오빠가 없어요.",
+  "en": "She does not have an older brother.",
+  "vi": "Cô ấy không có anh trai.",
+  "mn": "Тэр ахгүй.",
+  "ja": "彼女には兄がいません。",
+  "au": "12-s5",
+  "g": 3
+ },
+{
+  "zh": "她姐姐有没有男朋友？",
+  "py": "Tā jiějie yǒu méiyǒu nánpéngyou?",
+  "ko": "그녀의 언니는 남자친구가 있어요, 없어요?",
+  "en": "Does her older sister have a boyfriend?",
+  "vi": "Chị gái cô ấy có bạn trai không?",
+  "mn": "Түүний эгч найз залуутай юу?",
+  "ja": "彼女のお姉さんには彼氏がいますか？",
   "au": "12-s6",
   "g": 4
  },
- {
-  "zh": "他家有几口人？\n他家有五口人。",
-  "py": "Tā jiā yǒu jǐ kǒu rén?\nTā jiā yǒu wǔ kǒu rén.",
-  "ko": "그의 가족은 몇 명이에요?\n그의 가족은 다섯 명이에요.",
-  "en": "How many people are in his family?\nThere are five people in his family.",
-  "vi": "Gia đình anh ấy có mấy người?\nGia đình anh ấy có năm người.",
-  "mn": "Түүний гэр бүлд хэдэн хүн байдаг вэ?\nТүүний гэр бүлд таван хүн бий.",
-  "ja": "彼の家は何人家族ですか？\n彼の家は五人家族です。",
+{
+  "zh": "她姐姐没有男朋友。",
+  "py": "Tā jiějie méiyǒu nánpéngyou.",
+  "ko": "그녀의 언니는 남자친구가 없어요.",
+  "en": "Her older sister does not have a boyfriend.",
+  "vi": "Chị gái cô ấy không có bạn trai.",
+  "mn": "Түүний эгч найз залуугүй.",
+  "ja": "彼女のお姉さんには彼氏がいません。",
+  "au": "12-s6",
+  "g": 4
+ },
+{
+  "zh": "他家有几口人？",
+  "py": "Tā jiā yǒu jǐ kǒu rén?",
+  "ko": "그의 가족은 몇 명이에요?",
+  "en": "How many people are in his family?",
+  "vi": "Gia đình anh ấy có mấy người?",
+  "mn": "Түүний гэр бүлд хэдэн хүн байдаг вэ?",
+  "ja": "彼の家は何人家族ですか？",
   "au": "12-s7",
   "g": 5
  },
- {
-  "zh": "她家有几口人？\n她家有三口人。",
-  "py": "Tā jiā yǒu jǐ kǒu rén?\nTā jiā yǒu sān kǒu rén.",
-  "ko": "그녀의 가족은 몇 명이에요?\n그녀의 가족은 세 명이에요.",
-  "en": "How many people are in her family?\nThere are three people in her family.",
-  "vi": "Gia đình cô ấy có mấy người?\nGia đình cô ấy có ba người.",
-  "mn": "Түүний гэр бүлд хэдэн хүн байдаг вэ?\nТүүний гэр бүлд гурван хүн бий.",
-  "ja": "彼女の家は何人家族ですか？\n彼女の家は三人家族です。",
+{
+  "zh": "他家有五口人。",
+  "py": "Tā jiā yǒu wǔ kǒu rén.",
+  "ko": "그의 가족은 다섯 명이에요.",
+  "en": "There are five people in his family.",
+  "vi": "Gia đình anh ấy có năm người.",
+  "mn": "Түүний гэр бүлд таван хүн бий.",
+  "ja": "彼の家は五人家族です。",
+  "au": "12-s7",
+  "g": 5
+ },
+{
+  "zh": "她家有几口人？",
+  "py": "Tā jiā yǒu jǐ kǒu rén?",
+  "ko": "그녀의 가족은 몇 명이에요?",
+  "en": "How many people are in her family?",
+  "vi": "Gia đình cô ấy có mấy người?",
+  "mn": "Түүний гэр бүлд хэдэн хүн байдаг вэ?",
+  "ja": "彼女の家は何人家族ですか？",
+  "au": "12-s8",
+  "g": 6
+ },
+{
+  "zh": "她家有三口人。",
+  "py": "Tā jiā yǒu sān kǒu rén.",
+  "ko": "그녀의 가족은 세 명이에요.",
+  "en": "There are three people in her family.",
+  "vi": "Gia đình cô ấy có ba người.",
+  "mn": "Түүний гэр бүлд гурван хүн бий.",
+  "ja": "彼女の家は三人家族です。",
   "au": "12-s8",
   "g": 6
  }
-], exercise:[
- {
-  "zh": "刘大双有没有姐姐？\n刘大双没有姐姐。",
-  "py": "Liú Dàshuāng yǒu méiyǒu jiějie?\nLiú Dàshuāng méiyǒu jiějie.",
-  "ko": "류다솽은 누나(언니)가 있어요, 없어요?\n류다솽은 누나(언니)가 없어요.",
-  "en": "Does Liu Dashuang have an older sister?\nLiu Dashuang does not have an older sister.",
-  "vi": "Lưu Đại Song có chị gái không?\nLưu Đại Song không có chị gái.",
-  "mn": "Лю Дашуан эгчтэй юу?\nЛю Дашуан эгчгүй.",
-  "ja": "劉大双にはお姉さんがいますか？\n劉大双にはお姉さんがいません。",
-  "au": "12-ex1",
-  "g": 1
- },
- {
-  "zh": "刘大双有弟弟吗？\n刘大双有弟弟。",
-  "py": "Liú Dàshuāng yǒu dìdi ma?\nLiú Dàshuāng yǒu dìdi.",
-  "ko": "류다솽은 남동생이 있어요?\n류다솽은 남동생이 있어요.",
-  "en": "Does Liu Dashuang have a younger brother?\nLiu Dashuang has a younger brother.",
-  "vi": "Lưu Đại Song có em trai không?\nLưu Đại Song có em trai.",
-  "mn": "Лю Дашуан дүү хүүтэй юу?\nЛю Дашуан дүү хүүтэй.",
-  "ja": "劉大双には弟がいますか？\n劉大双には弟がいます。",
-  "au": "12-ex2",
-  "g": 1
- },
- {
-  "zh": "张老师有没有哥哥？\n张老师没有哥哥。",
-  "py": "Zhāng lǎoshī yǒu méiyǒu gēge?\nZhāng lǎoshī méiyǒu gēge.",
-  "ko": "장 선생님은 오빠(형)가 있어요, 없어요?\n장 선생님은 오빠(형)가 없어요.",
-  "en": "Does Teacher Zhang have an older brother?\nTeacher Zhang does not have an older brother.",
-  "vi": "Thầy/cô Trương có anh trai không?\nThầy/cô Trương không có anh trai.",
-  "mn": "Багш Жан ахтай юу?\nБагш Жан ахгүй.",
-  "ja": "張先生にはお兄さんがいますか？\n張先生にはお兄さんがいません。",
-  "au": "12-ex3",
-  "g": 2
- },
- {
-  "zh": "张老师有妹妹吗？\n张老师有妹妹。",
-  "py": "Zhāng lǎoshī yǒu mèimei ma?\nZhāng lǎoshī yǒu mèimei.",
-  "ko": "장 선생님은 여동생이 있어요?\n장 선생님은 여동생이 있어요.",
-  "en": "Does Teacher Zhang have a younger sister?\nTeacher Zhang has a younger sister.",
-  "vi": "Thầy/cô Trương có em gái không?\nThầy/cô Trương có em gái.",
-  "mn": "Багш Жан дүү охинтой юу?\nБагш Жан дүү охинтой.",
-  "ja": "張先生には妹がいますか？\n張先生には妹がいます。",
-  "au": "12-ex4",
-  "g": 2
- },
- {
-  "zh": "王芳芳有没有男朋友？\n王芳芳没有男朋友。",
-  "py": "Wáng Fāngfang yǒu méiyǒu nánpéngyou?\nWáng Fāngfang méiyǒu nánpéngyou.",
-  "ko": "왕팡팡은 남자친구가 있어요, 없어요?\n왕팡팡은 남자친구가 없어요.",
-  "en": "Does Wang Fangfang have a boyfriend?\nWang Fangfang does not have a boyfriend.",
-  "vi": "Vương Phương Phương có bạn trai không?\nVương Phương Phương không có bạn trai.",
-  "mn": "Ван Фан Фан найз залуутай юу?\nВан Фан Фан найз залуугүй.",
-  "ja": "王芳芳には彼氏がいますか？\n王芳芳には彼氏がいません。",
-  "au": "12-ex5",
-  "g": 3
- },
- {
-  "zh": "王芳芳有姐姐吗？\n王芳芳有姐姐。",
-  "py": "Wáng Fāngfang yǒu jiějie ma?\nWáng Fāngfang yǒu jiějie.",
-  "ko": "왕팡팡은 언니가 있어요?\n왕팡팡은 언니가 있어요.",
-  "en": "Does Wang Fangfang have an older sister?\nWang Fangfang has an older sister.",
-  "vi": "Vương Phương Phương có chị gái không?\nVương Phương Phương có chị gái.",
-  "mn": "Ван Фан Фан эгчтэй юу?\nВан Фан Фан эгчтэй.",
-  "ja": "王芳芳にはお姉さんがいますか？\n王芳芳にはお姉さんがいます。",
-  "au": "12-ex6",
-  "g": 3
- },
- {
-  "zh": "大卫有没有报纸？\n大卫没有报纸。",
-  "py": "Dàwèi yǒu méiyǒu bàozhǐ?\nDàwèi méiyǒu bàozhǐ.",
-  "ko": "데이비드는 신문이 있어요, 없어요?\n데이비드는 신문이 없어요.",
-  "en": "Does David have a newspaper?\nDavid does not have a newspaper.",
-  "vi": "David có báo không?\nDavid không có báo.",
-  "mn": "Дэвид сонинтой юу?\nДэвид сонингүй.",
-  "ja": "デイビッドは新聞を持っていますか？\nデイビッドは新聞を持っていません。",
-  "au": "12-ex7",
-  "g": 4
- },
- {
-  "zh": "大卫有书吗？\n大卫有书。",
-  "py": "Dàwèi yǒu shū ma?\nDàwèi yǒu shū.",
-  "ko": "데이비드는 책이 있어요?\n데이비드는 책이 있어요.",
-  "en": "Does David have a book?\nDavid has a book.",
-  "vi": "David có sách không?\nDavid có sách.",
-  "mn": "Дэвид номтой юу?\nДэвид номтой.",
-  "ja": "デイビッドは本を持っていますか？\nデイビッドは本を持っています。",
-  "au": "12-ex8",
-  "g": 4
- }
-], quiz:[
+],  quiz:[
  {
   "q": "“弟弟”의 뜻은?",
   "o": [
@@ -612,15 +611,15 @@ function D(id){
 const lesson=()=>LESSONS.find(l=>l.id===S.lesson)||LESSONS.find(l=>!l.draft)||LESSONS[0];
 const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const $=id=>document.getElementById(id);
-const KLABEL={p:'본문',x:'연습'};
+const KLABEL={p:'본문'};
 
 /* ----- 상태 계산 ----- */
 /* k: 'p' = 본문, 'x' = 연습 / 카드 하나 = 문장 또는 문답 하나 = 통과 단위 */
-const items=(l,k)=> k==='x' ? (l.exercise||[]) : l.sentences;
+const items=(l,k)=> l.sentences;
 function iPass(l,k,i){ const d=D(l.id)[k]; return (d.best[i]!=null && d.best[i]>=l.threshold) || !!d.self[i]; }
 function kCount(l,k){ return items(l,k).filter((_,i)=>iPass(l,k,i)).length; }
 function kPass(l,k){ const arr=items(l,k); return arr.length>0 && arr.every((_,i)=>iPass(l,k,i)); }
-function hasEx(l){ return (l.exercise||[]).length>0; }
+function hasEx(l){ return false; }
 function cardTotals(l){
   let p=0,t=0;
   ['p','x'].forEach(k=>{ t+=items(l,k).length; p+=kCount(l,k); });
@@ -631,12 +630,9 @@ function quizScore(l){ const d=D(l.id); return l.quiz.filter((q,i)=>d.quiz[i]===
 function vocabDone(l){ return !l.vocab.length || Object.keys(D(l.id).vq).length===l.vocab.length; }
 function vocabScore(l){ const d=D(l.id); return l.vocab.filter((_,i)=>d.vq[i]===i).length; }
 function vocabPass(l){ return vocabDone(l) && (!l.vocab.length || vocabScore(l)/l.vocab.length>=0.8); }
-function lessonPass(l){ return kPass(l,'p') && (!hasEx(l) || kPass(l,'x')) && vocabPass(l) && quizDone(l); }
+function lessonPass(l){ return kPass(l,'p') && vocabPass(l) && quizDone(l); }
 function tabsOf(l){
-  const T=[['vocab','🔤','단어'],['practice','🎙','본문']];
-  if(hasEx(l)) T.push(['exercise','🗣️','연습']);
-  T.push(['quiz','✏️','퀴즈'],['card','🪪','제출']);
-  return T;
+  return [['vocab','🔤','단어'],['practice','🎙','본문'],['quiz','✏️','퀴즈'],['card','🪪','제출']];
 }
 
 /* ----- 음성 합성 / 녹음 ----- */
@@ -768,8 +764,6 @@ async function startRecorder(c){
     const mime=recMime();
     c.mr=mime?new MediaRecorder(c.stream,{mimeType:mime}):new MediaRecorder(c.stream);
     c.mr.ondataavailable=e=>{ if(e.data && e.data.size) c.chunks.push(e.data); };
-    /* MediaRecorder의 마지막 dataavailable까지 받은 뒤에만 내 소리 URL을 만듭니다. */
-    c.mr.onstop=()=>finalize(c);
     c.mr.start(250);
   }catch(e){ c.mr=null; }
 }
@@ -798,10 +792,8 @@ function stopRec(){
   if(!cur||cur.stopping) return;
   const c=cur; c.stopping=true; clearTimeout(c.timer);
   try{ c.sr && c.sr.stop(); }catch(e){}
-  try{
-    if(c.mr && c.mr.state!=='inactive') c.mr.stop();
-    else if(!c.mr) finalize(c);
-  }catch(e){ finalize(c); }
+  try{ if(c.mr && c.mr.state!=='inactive') c.mr.stop(); }catch(e){}
+  setTimeout(()=>finalize(c), isPhone?1800:1000);
   renderCard(c.k,c.i);
 }
 /* 음성 인식이 허용되지 않았을 때 카드 아래에 나오는 안내 (선택한 언어) */
