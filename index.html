@@ -768,7 +768,8 @@ async function startRecorder(c){
     const mime=recMime();
     c.mr=mime?new MediaRecorder(c.stream,{mimeType:mime}):new MediaRecorder(c.stream);
     c.mr.ondataavailable=e=>{ if(e.data && e.data.size) c.chunks.push(e.data); };
-    c.mr.onstop=()=>{ finalize(c); };
+    /* MediaRecorder의 마지막 dataavailable까지 받은 뒤에만 내 소리 URL을 만듭니다. */
+    c.mr.onstop=()=>finalize(c);
     c.mr.start(250);
   }catch(e){ c.mr=null; }
 }
@@ -799,7 +800,7 @@ function stopRec(){
   try{ c.sr && c.sr.stop(); }catch(e){}
   try{
     if(c.mr && c.mr.state!=='inactive') c.mr.stop();
-    else finalize(c);
+    else if(!c.mr) finalize(c);
   }catch(e){ finalize(c); }
   renderCard(c.k,c.i);
 }
