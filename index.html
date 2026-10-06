@@ -37,7 +37,6 @@ button{font-family:inherit;font-size:15px;color:inherit}
 .wrap{max-width:560px;margin:0 auto;padding:16px 14px}
 h1{font-size:20px;margin:0 0 2px;letter-spacing:-.01em}
 .sub{color:var(--muted);font-size:13px;margin:0 0 12px}
-.name.need{border-color:var(--bad);box-shadow:0 0 0 2px var(--bad)}
 .name{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit}
 .row{display:flex;gap:8px;flex-wrap:wrap}
 .chips{display:flex;gap:8px;overflow-x:auto;padding:12px 0 4px;margin:0 -14px;padding-left:14px;padding-right:14px}
@@ -138,7 +137,7 @@ button:focus-visible,a:focus-visible,textarea:focus-visible,input:focus-visible{
 <body>
 <div class="wrap">
   <h1>기초생활중국어 연습</h1>
-  <p class="sub" id="subtitle">① 이름 입력 → ② 단어 → ③ 본문 → ④ 퀴즈 순서로 해 보세요.</p>
+  <p class="sub" id="subtitle">① 단어 → ② 본문 → ③ 퀴즈 순서로 해 보세요.</p>
   <input id="name" class="name" placeholder="이름 / Name / Tên / Нэр" autocomplete="name">
   <div id="langs" class="langs"></div>
   <div id="chips" class="chips"></div>
@@ -168,7 +167,7 @@ const AUDIO={
   '11-s4':'audio/11/text/11-01-4.mp3',
   '11-s5':'audio/11/text/11-01-5.mp3',
   '11-s6':'audio/11/text/11-01-6.mp3',
-  '11-s7':'audio/11/text/11-01-7.mp3'
+  '11-s7':'audio/11/text/11-01-7.mp3',
   '12-didi':'audio/12/words/12-03didi.mp3',
   '12-meimei':'audio/12/words/12-03meimei.mp3',
   '12-ji':'audio/12/words/12-03ji.mp3',
@@ -420,7 +419,6 @@ const AUDIO={
   '20-s34':'audio/20/text/20-02-34.mp3',
   '20-s35':'audio/20/text/20-02-35.mp3',
   '20-s36':'audio/20/text/20-02-36.mp3'
-
 };
 /*AUDIO_END*/
 </script>
@@ -429,16 +427,15 @@ const AUDIO={
 /* =====================================================================
    선생님 수정 구역 / TEACHER EDIT ZONE
    - 11~20과는 빈 칸(draft)만 만들어 둔 상태입니다. 본문(sentences)·단어(vocab)·퀴즈(quiz)를 채우면 활성화됩니다.
-   - 본문은 문장 하나가 카드 하나입니다. (줄바꿈으로 문답을 묶지 않습니다.)
+   - 문답처럼 두 줄짜리 카드는 zh/py/뜻 안에 줄바꿈(\n)을 넣습니다. 첫 줄=질문, 둘째 줄=대답.
    - 카드 하나(문장 또는 문답 하나)가 통과 단위입니다. (g 숫자는 원래 음성 파일 번호 표시용이며 통과 계산에는 쓰지 않습니다.)
    - threshold: 자동 점수 통과 기준(%) / 초급은 낮게, 중급은 높게
    ===================================================================== */
 const LESSONS = [];
-
 /* 11~20과 빈 칸: 본문(sentences)·단어(vocab)·퀴즈(quiz)를 채우면 자동으로 활성화됩니다. (문화는 이 앱에서 다루지 않습니다) */
 for(let n=11;n<=20;n++){
   LESSONS.splice(n-11,0,{id:'l'+n, title:n+'과', level:'', threshold:60, draft:true,
-    sentences:[], vocab:[], culture:{title:'',text:'',links:[],prompt:''}, quiz:[]});
+    sentences:[], exercise:[], vocab:[], culture:{title:'',text:'',links:[],prompt:''}, quiz:[]});
 }
 
 /* 11과: au = 원어민 MP3 id(AUDIO 안). 없으면 폰 TTS로 재생됩니다. */
@@ -469,24 +466,275 @@ Object.assign(LESSONS.find(l=>l.id==='l11'),{draft:false, sentences:[
   {zh:'衣服', py:'yīfu', ko:'옷', en:'clothes', vi:'quần áo', mn:'хувцас', ja:'服', au:'11-yifu'},
   {zh:'约会', py:'yuēhuì', ko:'데이트하다, 약속하여 만나다', en:'to date; to meet by arrangement', vi:'hẹn hò, hẹn gặp', mn:'болзох, цаг товлон уулзах', ja:'デートする、会う約束をする', au:'11-yuehui'}
 ]});
-/* 12과: 본문 16문장 (문답을 문장 하나씩 나눔, 카드 하나 = 문장 하나 = 통과 단위) */
+/* 12과: 본문 8문답, 연습 8문답 (카드 하나 = 통과 단위) */
 Object.assign(LESSONS.find(l=>l.id==='l12'),{draft:false, sentences:[
-{"zh": "他有弟弟吗？", "py": "Tā yǒu dìdi ma?", "ko": "그는 남동생이 있어요?", "en": "Does he have a younger brother?", "vi": "Anh ấy có em trai không?", "mn": "Тэр дүү хүүтэй юу?", "ja": "彼には弟がいますか？", "au": "12-s1", "g": 1},
-{"zh": "他有弟弟。", "py": "Tā yǒu dìdi.", "ko": "그는 남동생이 있어요.", "en": "He has a younger brother.", "vi": "Anh ấy có em trai.", "mn": "Тэр дүү хүүтэй.", "ja": "彼には弟がいます。", "au": "12-s2", "g": 2},
-{"zh": "他有几个弟弟？", "py": "Tā yǒu jǐ ge dìdi?", "ko": "그는 남동생이 몇 명 있어요?", "en": "How many younger brothers does he have?", "vi": "Anh ấy có mấy em trai?", "mn": "Тэр хэдэн дүү хүүтэй вэ?", "ja": "彼には弟が何人いますか？", "au": "12-s3", "g": 3},
-{"zh": "他有一个弟弟。", "py": "Tā yǒu yí ge dìdi.", "ko": "그는 남동생이 한 명 있어요.", "en": "He has one younger brother.", "vi": "Anh ấy có một em trai.", "mn": "Тэр нэг дүү хүүтэй.", "ja": "彼には弟が一人います。", "au": "12-s4", "g": 4},
-{"zh": "他有没有妹妹？", "py": "Tā yǒu méiyǒu mèimei?", "ko": "그는 여동생이 있어요, 없어요?", "en": "Does he have a younger sister?", "vi": "Anh ấy có em gái không?", "mn": "Тэр дүү охинтой юу?", "ja": "彼には妹がいますか？", "au": "12-s5", "g": 5},
-{"zh": "他有妹妹。", "py": "Tā yǒu mèimei.", "ko": "그는 여동생이 있어요.", "en": "He has a younger sister.", "vi": "Anh ấy có em gái.", "mn": "Тэр дүү охинтой.", "ja": "彼には妹がいます。", "au": "12-s6", "g": 6},
-{"zh": "他有几个妹妹？", "py": "Tā yǒu jǐ ge mèimei?", "ko": "그는 여동생이 몇 명 있어요?", "en": "How many younger sisters does he have?", "vi": "Anh ấy có mấy em gái?", "mn": "Тэр хэдэн дүү охинтой вэ?", "ja": "彼には妹が何人いますか？", "au": "12-s7", "g": 7},
-{"zh": "他有两个妹妹。", "py": "Tā yǒu liǎng ge mèimei.", "ko": "그는 여동생이 두 명 있어요.", "en": "He has two younger sisters.", "vi": "Anh ấy có hai em gái.", "mn": "Тэр хоёр дүү охинтой.", "ja": "彼には妹が二人います。", "au": "12-s8", "g": 8},
-{"zh": "她有没有哥哥？", "py": "Tā yǒu méiyǒu gēge?", "ko": "그녀는 오빠가 있어요, 없어요?", "en": "Does she have an older brother?", "vi": "Cô ấy có anh trai không?", "mn": "Тэр ахтай юу?", "ja": "彼女には兄がいますか？", "au": "12-s9", "g": 9},
-{"zh": "她没有哥哥。", "py": "Tā méiyǒu gēge.", "ko": "그녀는 오빠가 없어요.", "en": "She does not have an older brother.", "vi": "Cô ấy không có anh trai.", "mn": "Тэр ахгүй.", "ja": "彼女には兄がいません。", "au": "12-s10", "g": 10},
-{"zh": "她姐姐有没有男朋友？", "py": "Tā jiějie yǒu méiyǒu nánpéngyou?", "ko": "그녀의 언니는 남자친구가 있어요, 없어요?", "en": "Does her older sister have a boyfriend?", "vi": "Chị gái cô ấy có bạn trai không?", "mn": "Түүний эгч найз залуутай юу?", "ja": "彼女のお姉さんには彼氏がいますか？", "au": "12-s11", "g": 11},
-{"zh": "她姐姐没有男朋友。", "py": "Tā jiějie méiyǒu nánpéngyou.", "ko": "그녀의 언니는 남자친구가 없어요.", "en": "Her older sister does not have a boyfriend.", "vi": "Chị gái cô ấy không có bạn trai.", "mn": "Түүний эгч найз залуугүй.", "ja": "彼女のお姉さんには彼氏がいません。", "au": "12-s12", "g": 12},
-{"zh": "他家有几口人？", "py": "Tā jiā yǒu jǐ kǒu rén?", "ko": "그의 가족은 몇 명이에요?", "en": "How many people are in his family?", "vi": "Gia đình anh ấy có mấy người?", "mn": "Түүний гэр бүлд хэдэн хүн байдаг вэ?", "ja": "彼の家は何人家族ですか？", "au": "12-s13", "g": 13},
-{"zh": "他家有五口人。", "py": "Tā jiā yǒu wǔ kǒu rén.", "ko": "그의 가족은 다섯 명이에요.", "en": "There are five people in his family.", "vi": "Gia đình anh ấy có năm người.", "mn": "Түүний гэр бүлд таван хүн бий.", "ja": "彼の家は五人家族です。", "au": "12-s14", "g": 14},
-{"zh": "她家有几口人？", "py": "Tā jiā yǒu jǐ kǒu rén?", "ko": "그녀의 가족은 몇 명이에요?", "en": "How many people are in her family?", "vi": "Gia đình cô ấy có mấy người?", "mn": "Түүний гэр бүлд хэдэн хүн байдаг вэ?", "ja": "彼女の家は何人家族ですか？", "au": "12-s15", "g": 15},
-{"zh": "她家有三口人。", "py": "Tā jiā yǒu sān kǒu rén.", "ko": "그녀의 가족은 세 명이에요.", "en": "There are three people in her family.", "vi": "Gia đình cô ấy có ba người.", "mn": "Түүний гэр бүлд гурван хүн бий.", "ja": "彼女の家は三人家族です。", "au": "12-s16", "g": 16}
+{
+  "zh": "他有弟弟吗？",
+  "py": "Tā yǒu dìdi ma?",
+  "ko": "그는 남동생이 있어요?",
+  "en": "Does he have a younger brother?",
+  "vi": "Anh ấy có em trai không?",
+  "mn": "Тэр дүү хүүтэй юу?",
+  "ja": "彼には弟がいますか？",
+  "au": "12-02-01",
+  "g": 1
+},
+{
+ "zh": "他有弟弟。", 
+ "py": "Tā yǒu dìdi.", 
+ "ko": "그는 남동생이 있어요.", 
+ "en": "He has a younger brother.", 
+ "vi": "Anh ấy có em trai.", 
+ "mn": "Тэр дүү хүүтэй.", 
+ "ja": "彼には弟がいます。",
+  "au": "12-02-02",
+  "g": 1
+},
+{
+  "zh": "他有几个弟弟？",
+  "py": "Tā yǒu jǐ ge dìdi?",
+  "ko": "그는 남동생이 몇 명 있어요?",
+  "en": "How many younger brothers does he have?",
+  "vi": "Anh ấy có mấy em trai?",
+  "mn": "Тэр хэдэн дүү хүүтэй вэ?",
+  "ja": "彼には弟が何人いますか？",
+  "au": "12-02-03",
+  "g": 1
+},
+{
+  "zh": "他有一个弟弟。",
+  "py": "Tā yǒu yí ge dìdi.",
+  "ko": "그는 남동생이 한 명 있어요.",
+  "en": "He has one younger brother.",
+  "vi": "Anh ấy có một em trai.",
+  "mn": "Тэр нэг дүү хүүтэй.",
+  "ja": "彼には弟が一人います。",
+  "au": "12-02-04",
+  "g": 1
+},
+{
+  "zh": "他有没有妹妹？",
+  "py": "Tā yǒu méiyǒu mèimei?",
+  "ko": "그는 여동생이 있어요, 없어요?",
+  "en": "Does he have a younger sister?",
+  "vi": "Anh ấy có em gái không?",
+  "mn": "Тэр дүү охинтой юу?",
+  "ja": "彼には妹がいますか？",
+  "au": "12-02-05",
+  "g": 2
+},
+{
+  "zh": "他有妹妹。",
+  "py": "Tā yǒu mèimei.",
+  "ko": "그는 여동생이 있어요.",
+  "en": "He has a younger sister.",
+  "vi": "Anh ấy có em gái.",
+  "mn": "Тэр дүү охинтой.",
+  "ja": "彼には妹がいます。",
+  "au": "12-02-06",
+  "g": 2
+},
+{
+  "zh": "他有几个妹妹？",
+  "py": "Tā yǒu jǐ ge mèimei?",
+  "ko": "그는 여동생이 몇 명 있어요?",
+  "en": "How many younger sisters does he have?",
+  "vi": "Anh ấy có mấy em gái?",
+  "mn": "Тэр хэдэн дүү охинтой вэ?",
+  "ja": "彼には妹が何人いますか？",
+  "au": "12-02-07",
+  "g": 2
+},
+{
+  "zh": "他有两个妹妹。",
+  "py": "Tā yǒu liǎng ge mèimei.",
+  "ko": "그는 여동생이 두 명 있어요.",
+  "en": "He has two younger sisters.",
+  "vi": "Anh ấy có hai em gái.",
+  "mn": "Тэр хоёр дүү охинтой.",
+  "ja": "彼には妹が二人います。",
+  "au": "12-02-08",
+  "g": 2
+},
+{
+  "zh": "她有没有哥哥？",
+  "py": "Tā yǒu méiyǒu gēge?",
+  "ko": "그녀는 오빠가 있어요, 없어요?",
+  "en": "Does she have an older brother?",
+  "vi": "Cô ấy có anh trai không?",
+  "mn": "Тэр ахтай юу?",
+  "ja": "彼女には兄がいますか？",
+  "au": "12-02-09",
+  "g": 3
+},
+{
+  "zh": "她没有哥哥。",
+  "py": "Tā méiyǒu gēge.",
+  "ko": "그녀는 오빠가 없어요.",
+  "en": "She does not have an older brother.",
+  "vi": "Cô ấy không có anh trai.",
+  "mn": "Тэр ахгүй.",
+  "ja": "彼女には兄がいません。",
+  "au": "12-02-10",
+  "g": 3
+},
+{
+  "zh": "她姐姐有没有男朋友？",
+  "py": "Tā jiějie yǒu méiyǒu nánpéngyou.",
+  "ko": "그녀의 언니는 남자친구가 있어요, 없어요?",
+  "en": "Does her older sister have a boyfriend?",
+  "vi": "Chị gái cô ấy có bạn trai không?",
+  "mn": "Түүний эгч найз залуутай юу?",
+  "ja": "彼女のお姉さんには彼氏がいますか？",
+  "au": "12-02-11",
+  "g": 4
+},
+{
+  "zh": "她姐姐没有男朋友。",
+  "py": "Tā jiějie méiyǒu nánpéngyou.",
+  "ko": "그녀의 언니는 남자친구가 없어요.",
+  "en": "Her older sister does not have a boyfriend.",
+  "vi": "Chị gái cô ấy không có bạn trai.",
+  "mn": "Түүний эгч найз залуугүй.",
+  "ja": "彼女のお姉さんには彼氏がいません。",
+  "au": "12-02-12",
+  "g": 4
+},
+{
+  "zh": "他家有几口人？",
+  "py": "Tā jiā yǒu jǐ kǒu rén?",
+  "ko": "그의 가족은 몇 명이에요?",
+  "en": "How many people are in his family?",
+  "vi": "Gia đình anh ấy có mấy người?",
+  "mn": "Түүний гэр бүлд хэдэн хүн байдаг вэ?",
+  "ja": "彼の家は何人家族ですか？",
+  "au": "12-02-13",
+  "g": 5
+},
+{
+  "zh": "他家有五口人。",
+  "py": "Tā jiā yǒu wǔ kǒu rén.",
+  "ko": "그의 가족은 다섯 명이에요.",
+  "en": "There are five people in his family.",
+  "vi": "Gia đình anh ấy có năm người.",
+  "mn": "Түүний гэр бүлд таван хүн бий.",
+  "ja": "彼の家は五人家族です。",
+  "au": "12-02-14",
+  "g": 5
+},
+{
+  "zh": "她家有几口人？",
+  "py": "Tā jiā yǒu jǐ kǒu rén?",
+  "ko": "그녀의 가족은 몇 명이에요?",
+  "en": "How many people are in her family?",
+  "vi": "Gia đình cô ấy có mấy người?",
+  "mn": "Түүний гэр бүлд хэдэн хүн байдаг вэ?",
+  "ja": "彼女の家は何人家族ですか？",
+  "au": "12-02-15",
+  "g": 6
+},
+{
+  "zh": "她家有三口人。",
+  "py": "Tā jiā yǒu sān kǒu rén.",
+  "ko": "그녀의 가족은 세 명이에요.",
+  "en": "There are three people in her family.",
+  "vi": "Gia đình cô ấy có ba người.",
+  "mn": "Түүний гэр бүлд гурван хүн бий.",
+  "ja": "彼女の家は三人家族です。",
+  "au": "12-02-16",
+  "g": 6
+}
+```
+
+], exercise:[
+ {
+  "zh": "刘大双有没有姐姐？\n刘大双没有姐姐。",
+  "py": "Liú Dàshuāng yǒu méiyǒu jiějie?\nLiú Dàshuāng méiyǒu jiějie.",
+  "ko": "류다솽은 누나(언니)가 있어요, 없어요?\n류다솽은 누나(언니)가 없어요.",
+  "en": "Does Liu Dashuang have an older sister?\nLiu Dashuang does not have an older sister.",
+  "vi": "Lưu Đại Song có chị gái không?\nLưu Đại Song không có chị gái.",
+  "mn": "Лю Дашуан эгчтэй юу?\nЛю Дашуан эгчгүй.",
+  "ja": "劉大双にはお姉さんがいますか？\n劉大双にはお姉さんがいません。",
+  "au": "12-ex1",
+  "g": 1
+ },
+ {
+  "zh": "刘大双有弟弟吗？\n刘大双有弟弟。",
+  "py": "Liú Dàshuāng yǒu dìdi ma?\nLiú Dàshuāng yǒu dìdi.",
+  "ko": "류다솽은 남동생이 있어요?\n류다솽은 남동생이 있어요.",
+  "en": "Does Liu Dashuang have a younger brother?\nLiu Dashuang has a younger brother.",
+  "vi": "Lưu Đại Song có em trai không?\nLưu Đại Song có em trai.",
+  "mn": "Лю Дашуан дүү хүүтэй юу?\nЛю Дашуан дүү хүүтэй.",
+  "ja": "劉大双には弟がいますか？\n劉大双には弟がいます。",
+  "au": "12-ex2",
+  "g": 1
+ },
+ {
+  "zh": "张老师有没有哥哥？\n张老师没有哥哥。",
+  "py": "Zhāng lǎoshī yǒu méiyǒu gēge?\nZhāng lǎoshī méiyǒu gēge.",
+  "ko": "장 선생님은 오빠(형)가 있어요, 없어요?\n장 선생님은 오빠(형)가 없어요.",
+  "en": "Does Teacher Zhang have an older brother?\nTeacher Zhang does not have an older brother.",
+  "vi": "Thầy/cô Trương có anh trai không?\nThầy/cô Trương không có anh trai.",
+  "mn": "Багш Жан ахтай юу?\nБагш Жан ахгүй.",
+  "ja": "張先生にはお兄さんがいますか？\n張先生にはお兄さんがいません。",
+  "au": "12-ex3",
+  "g": 2
+ },
+ {
+  "zh": "张老师有妹妹吗？\n张老师有妹妹。",
+  "py": "Zhāng lǎoshī yǒu mèimei ma?\nZhāng lǎoshī yǒu mèimei.",
+  "ko": "장 선생님은 여동생이 있어요?\n장 선생님은 여동생이 있어요.",
+  "en": "Does Teacher Zhang have a younger sister?\nTeacher Zhang has a younger sister.",
+  "vi": "Thầy/cô Trương có em gái không?\nThầy/cô Trương có em gái.",
+  "mn": "Багш Жан дүү охинтой юу?\nБагш Жан дүү охинтой.",
+  "ja": "張先生には妹がいますか？\n張先生には妹がいます。",
+  "au": "12-ex4",
+  "g": 2
+ },
+ {
+  "zh": "王芳芳有没有男朋友？\n王芳芳没有男朋友。",
+  "py": "Wáng Fāngfang yǒu méiyǒu nánpéngyou?\nWáng Fāngfang méiyǒu nánpéngyou.",
+  "ko": "왕팡팡은 남자친구가 있어요, 없어요?\n왕팡팡은 남자친구가 없어요.",
+  "en": "Does Wang Fangfang have a boyfriend?\nWang Fangfang does not have a boyfriend.",
+  "vi": "Vương Phương Phương có bạn trai không?\nVương Phương Phương không có bạn trai.",
+  "mn": "Ван Фан Фан найз залуутай юу?\nВан Фан Фан найз залуугүй.",
+  "ja": "王芳芳には彼氏がいますか？\n王芳芳には彼氏がいません。",
+  "au": "12-ex5",
+  "g": 3
+ },
+ {
+  "zh": "王芳芳有姐姐吗？\n王芳芳有姐姐。",
+  "py": "Wáng Fāngfang yǒu jiějie ma?\nWáng Fāngfang yǒu jiějie.",
+  "ko": "왕팡팡은 언니가 있어요?\n왕팡팡은 언니가 있어요.",
+  "en": "Does Wang Fangfang have an older sister?\nWang Fangfang has an older sister.",
+  "vi": "Vương Phương Phương có chị gái không?\nVương Phương Phương có chị gái.",
+  "mn": "Ван Фан Фан эгчтэй юу?\nВан Фан Фан эгчтэй.",
+  "ja": "王芳芳にはお姉さんがいますか？\n王芳芳にはお姉さんがいます。",
+  "au": "12-ex6",
+  "g": 3
+ },
+ {
+  "zh": "大卫有没有报纸？\n大卫没有报纸。",
+  "py": "Dàwèi yǒu méiyǒu bàozhǐ?\nDàwèi méiyǒu bàozhǐ.",
+  "ko": "데이비드는 신문이 있어요, 없어요?\n데이비드는 신문이 없어요.",
+  "en": "Does David have a newspaper?\nDavid does not have a newspaper.",
+  "vi": "David có báo không?\nDavid không có báo.",
+  "mn": "Дэвид сонинтой юу?\nДэвид сонингүй.",
+  "ja": "デイビッドは新聞を持っていますか？\nデイビッドは新聞を持っていません。",
+  "au": "12-ex7",
+  "g": 4
+ },
+ {
+  "zh": "大卫有书吗？\n大卫有书。",
+  "py": "Dàwèi yǒu shū ma?\nDàwèi yǒu shū.",
+  "ko": "데이비드는 책이 있어요?\n데이비드는 책이 있어요.",
+  "en": "Does David have a book?\nDavid has a book.",
+  "vi": "David có sách không?\nDavid có sách.",
+  "mn": "Дэвид номтой юу?\nДэвид номтой.",
+  "ja": "デイビッドは本を持っていますか？\nデイビッドは本を持っています。",
+  "au": "12-ex8",
+  "g": 4
+ }
 ], quiz:[
  {
   "q": "“弟弟”의 뜻은?",
@@ -597,523 +845,22 @@ Object.assign(LESSONS.find(l=>l.id==='l12'),{draft:false, sentences:[
   "au": "12-wu"
  }
 ]});
-/* 13과: 본문 10문장(한 문장씩 독립 카드), 단어 13개, 퀴즈 3문제. 화자 표시(丈夫/妻子)는 점수에 들어가지 않도록 뺐음 */
-Object.assign(LESSONS.find(l=>l.id==='l13'),{draft:false, sentences:[
-{"zh": "我的钥匙在哪儿？", "py": "Wǒ de yàoshi zài nǎr?", "ko": "내 열쇠는 어디에 있어요?", "en": "Where is my key?", "vi": "Chìa khóa của tôi ở đâu?", "mn": "Миний түлхүүр хаана байна?", "ja": "私の鍵はどこですか？", "au": "13-s1", "g": 1},
-{"zh": "钥匙在桌子上。", "py": "Yàoshi zài zhuōzi shàng.", "ko": "열쇠는 탁자 위에 있어요.", "en": "The key is on the table.", "vi": "Chìa khóa ở trên bàn.", "mn": "Түлхүүр ширээн дээр байна.", "ja": "鍵は机の上にあります。", "au": "13-s2", "g": 2},
-{"zh": "钥匙不在桌子上。", "py": "Yàoshi bú zài zhuōzi shàng.", "ko": "열쇠는 탁자 위에 없어요.", "en": "The key is not on the table.", "vi": "Chìa khóa không ở trên bàn.", "mn": "Түлхүүр ширээн дээр байхгүй байна.", "ja": "鍵は机の上にありません。", "au": "13-s3", "g": 3},
-{"zh": "钥匙在不在沙发上？", "py": "Yàoshi zài bu zài shāfā shàng?", "ko": "열쇠는 소파 위에 있어요, 없어요?", "en": "Is the key on the sofa?", "vi": "Chìa khóa có ở trên ghế sô-pha không?", "mn": "Түлхүүр буйдан дээр байна уу?", "ja": "鍵はソファーの上にありますか？", "au": "13-s4", "g": 4},
-{"zh": "不在沙发上。", "py": "Bú zài shāfā shàng.", "ko": "소파 위에 없어요.", "en": "It is not on the sofa.", "vi": "Không ở trên ghế sô-pha.", "mn": "Буйдан дээр байхгүй.", "ja": "ソファーの上にはありません。", "au": "13-s5", "g": 5},
-{"zh": "在不在沙发下边？", "py": "Zài bu zài shāfā xiàbian?", "ko": "소파 아래에 있어요, 없어요?", "en": "Is it under the sofa?", "vi": "Có ở dưới ghế sô-pha không?", "mn": "Буйдангийн доор байна уу?", "ja": "ソファーの下にありますか？", "au": "13-s6", "g": 6},
-{"zh": "也不在沙发下边。", "py": "Yě bú zài shāfā xiàbian.", "ko": "소파 아래에도 없어요.", "en": "It is not under the sofa either.", "vi": "Cũng không ở dưới ghế sô-pha.", "mn": "Буйдангийн доор ч байхгүй.", "ja": "ソファーの下にもありません。", "au": "13-s7", "g": 7},
-{"zh": "在不在电话旁边？", "py": "Zài bu zài diànhuà pángbiān?", "ko": "전화기 옆에 있어요, 없어요?", "en": "Is it next to the phone?", "vi": "Có ở bên cạnh điện thoại không?", "mn": "Утасны хажууд байна уу?", "ja": "電話のそばにありますか？", "au": "13-s8", "g": 8},
-{"zh": "不在电话旁边。", "py": "Bú zài diànhuà pángbiān.", "ko": "전화기 옆에 없어요.", "en": "It is not next to the phone.", "vi": "Không ở bên cạnh điện thoại.", "mn": "Утасны хажууд байхгүй.", "ja": "電話のそばにはありません。", "au": "13-s9", "g": 9},
-{"zh": "你手里是什么？", "py": "Nǐ shǒu lǐ shì shénme?", "ko": "당신 손 안에 있는 것은 뭐예요?", "en": "What is in your hand?", "vi": "Trong tay bạn là cái gì vậy?", "mn": "Чиний гарт юу байна вэ?", "ja": "あなたの手の中にあるのは何ですか？", "au": "13-s10", "g": 10}
-], quiz:[
- {
-  "q": "“钥匙在不在沙发上？”은 무엇을 묻는 말인가요?",
-  "o": [
-   "열쇠가 소파 위에 있는지 없는지",
-   "열쇠가 얼마인지",
-   "소파가 어디에 있는지"
-  ],
-  "a": 0
- },
- {
-  "q": "“钥匙不在桌子上”에서 “不在”의 뜻은?",
-  "o": [
-   "~에 있다",
-   "~에 없다",
-   "~을 찾다"
-  ],
-  "a": 1
- },
- {
-  "q": "아내가 마지막에 한 말 “你手里是什么？”의 뜻은?",
-  "o": [
-   "열쇠가 어디에 있어요?",
-   "전화는 어디에 있어요?",
-   "당신 손 안에 있는 것은 뭐예요?"
-  ],
-  "a": 2
- }
-], vocab:[
- {
-  "zh": "丈夫",
-  "py": "zhàngfu",
-  "ko": "남편",
-  "en": "husband",
-  "vi": "chồng",
-  "mn": "нөхөр",
-  "ja": "夫、旦那さん",
-  "au": "13-zhangfu"
- },
- {
-  "zh": "钥匙",
-  "py": "yàoshi",
-  "ko": "열쇠",
-  "en": "key",
-  "vi": "chìa khóa",
-  "mn": "түлхүүр",
-  "ja": "鍵",
-  "au": "13-yaoshi"
- },
- {
-  "zh": "在",
-  "py": "zài",
-  "ko": "~에 있다",
-  "en": "to be at/in (a place)",
-  "vi": "ở, ở tại",
-  "mn": "-д байх (оршин байх)",
-  "ja": "～にある、～にいる",
-  "au": "13-zai"
- },
- {
-  "zh": "哪儿",
-  "py": "nǎr",
-  "ko": "어디",
-  "en": "where",
-  "vi": "ở đâu",
-  "mn": "хаана",
-  "ja": "どこ",
-  "au": "13-nar"
- },
- {
-  "zh": "妻子",
-  "py": "qīzi",
-  "ko": "아내",
-  "en": "wife",
-  "vi": "vợ",
-  "mn": "эхнэр",
-  "ja": "妻、奥さん",
-  "au": "13-qizi"
- },
- {
-  "zh": "桌子",
-  "py": "zhuōzi",
-  "ko": "탁자, 책상",
-  "en": "table, desk",
-  "vi": "cái bàn",
-  "mn": "ширээ",
-  "ja": "テーブル、机",
-  "au": "13-zhuozi"
- },
- {
-  "zh": "上",
-  "py": "shàng",
-  "ko": "위",
-  "en": "on, above, top",
-  "vi": "trên",
-  "mn": "дээр",
-  "ja": "上",
-  "au": "13-shang"
- },
- {
-  "zh": "沙发",
-  "py": "shāfā",
-  "ko": "소파",
-  "en": "sofa",
-  "vi": "ghế sô-pha",
-  "mn": "буйдан",
-  "ja": "ソファー",
-  "au": "13-shafa"
- },
- {
-  "zh": "下边",
-  "py": "xiàbian",
-  "ko": "아래",
-  "en": "below, under",
-  "vi": "bên dưới",
-  "mn": "доор",
-  "ja": "下",
-  "au": "13-xiabian"
- },
- {
-  "zh": "电话",
-  "py": "diànhuà",
-  "ko": "전화",
-  "en": "telephone",
-  "vi": "điện thoại",
-  "mn": "утас",
-  "ja": "電話",
-  "au": "13-dianhua"
- },
- {
-  "zh": "旁边",
-  "py": "pángbiān",
-  "ko": "옆",
-  "en": "beside, next to",
-  "vi": "bên cạnh",
-  "mn": "хажуу",
-  "ja": "横、そば",
-  "au": "13-pangbian"
- },
- {
-  "zh": "手",
-  "py": "shǒu",
-  "ko": "손",
-  "en": "hand",
-  "vi": "bàn tay",
-  "mn": "гар",
-  "ja": "手",
-  "au": "13-shou"
- },
- {
-  "zh": "里",
-  "py": "lǐ",
-  "ko": "안, 속",
-  "en": "inside, in",
-  "vi": "bên trong",
-  "mn": "дотор",
-  "ja": "中、内",
-  "au": "13-li"
- }
-]});
-/* 14과: 본문 18문장(질문·대답 모두 한 문장씩 독립 카드), 단어 9개, 퀴즈 3문제(초안) */
-Object.assign(LESSONS.find(l=>l.id==='l14'),{draft:false, sentences:[
- {
-  "zh": "餐桌在哪儿？",
-  "py": "Cānzhuō zài nǎr?",
-  "ko": "식탁은 어디에 있어요?",
-  "en": "Where is the dining table?",
-  "vi": "Bàn ăn ở đâu?",
-  "mn": "Хоолны ширээ хаана байна?",
-  "ja": "ダイニングテーブルはどこですか？",
-  "au": "14-s1",
-  "g": 1
- },
- {
-  "zh": "餐桌在沙发前边。",
-  "py": "Cānzhuō zài shāfā qiánbian.",
-  "ko": "식탁은 소파 앞에 있어요.",
-  "en": "The dining table is in front of the sofa.",
-  "vi": "Bàn ăn ở phía trước ghế sô-pha.",
-  "mn": "Хоолны ширээ буйдангийн урд байна.",
-  "ja": "ダイニングテーブルはソファーの前にあります。",
-  "au": "14-s2",
-  "g": 2
- },
- {
-  "zh": "书柜在哪儿？",
-  "py": "Shūguì zài nǎr?",
-  "ko": "책장은 어디에 있어요?",
-  "en": "Where is the bookcase?",
-  "vi": "Tủ sách ở đâu?",
-  "mn": "Номын шүүгээ хаана байна?",
-  "ja": "本棚はどこですか？",
-  "au": "14-s3",
-  "g": 3
- },
- {
-  "zh": "书柜在沙发后边。",
-  "py": "Shūguì zài shāfā hòubian.",
-  "ko": "책장은 소파 뒤에 있어요.",
-  "en": "The bookcase is behind the sofa.",
-  "vi": "Tủ sách ở phía sau ghế sô-pha.",
-  "mn": "Номын шүүгээ буйдангийн ард байна.",
-  "ja": "本棚はソファーの後ろにあります。",
-  "au": "14-s4",
-  "g": 4
- },
- {
-  "zh": "桌子在哪儿？",
-  "py": "Zhuōzi zài nǎr?",
-  "ko": "탁자는 어디에 있어요?",
-  "en": "Where is the table?",
-  "vi": "Cái bàn ở đâu?",
-  "mn": "Ширээ хаана байна?",
-  "ja": "机はどこですか？",
-  "au": "14-s5",
-  "g": 5
- },
- {
-  "zh": "桌子在书柜左边。",
-  "py": "Zhuōzi zài shūguì zuǒbian.",
-  "ko": "탁자는 책장 왼쪽에 있어요.",
-  "en": "The table is to the left of the bookcase.",
-  "vi": "Cái bàn ở bên trái tủ sách.",
-  "mn": "Ширээ номын шүүгээний зүүн талд байна.",
-  "ja": "机は本棚の左にあります。",
-  "au": "14-s6",
-  "g": 6
- },
- {
-  "zh": "电话在哪儿？",
-  "py": "Diànhuà zài nǎr?",
-  "ko": "전화기는 어디에 있어요?",
-  "en": "Where is the phone?",
-  "vi": "Điện thoại ở đâu?",
-  "mn": "Утас хаана байна?",
-  "ja": "電話はどこですか？",
-  "au": "14-s7",
-  "g": 7
- },
- {
-  "zh": "电话在电脑右边。",
-  "py": "Diànhuà zài diànnǎo yòubian.",
-  "ko": "전화기는 컴퓨터 오른쪽에 있어요.",
-  "en": "The phone is to the right of the computer.",
-  "vi": "Điện thoại ở bên phải máy tính.",
-  "mn": "Утас компьютерийн баруун талд байна.",
-  "ja": "電話はパソコンの右にあります。",
-  "au": "14-s8",
-  "g": 8
- },
- {
-  "zh": "茶在桌子上吗？",
-  "py": "Chá zài zhuōzi shàng ma?",
-  "ko": "차는 탁자 위에 있어요?",
-  "en": "Is the tea on the table?",
-  "vi": "Trà có ở trên bàn không?",
-  "mn": "Цай ширээн дээр байна уу?",
-  "ja": "お茶は机の上にありますか？",
-  "au": "14-s9",
-  "g": 9
- },
- {
-  "zh": "茶在桌子上。",
-  "py": "Chá zài zhuōzi shàng.",
-  "ko": "차는 탁자 위에 있어요.",
-  "en": "The tea is on the table.",
-  "vi": "Trà ở trên bàn.",
-  "mn": "Цай ширээн дээр байна.",
-  "ja": "お茶は机の上にあります。",
-  "au": "14-s10",
-  "g": 10
- },
- {
-  "zh": "篮球在椅子下边吗？",
-  "py": "Lánqiú zài yǐzi xiàbian ma?",
-  "ko": "농구공은 의자 아래에 있어요?",
-  "en": "Is the basketball under the chair?",
-  "vi": "Quả bóng rổ có ở dưới ghế không?",
-  "mn": "Сагсан бөмбөг сандлын доор байна уу?",
-  "ja": "バスケットボールは椅子の下にありますか？",
-  "au": "14-s11",
-  "g": 11
- },
- {
-  "zh": "篮球在椅子下边。",
-  "py": "Lánqiú zài yǐzi xiàbian.",
-  "ko": "농구공은 의자 아래에 있어요.",
-  "en": "The basketball is under the chair.",
-  "vi": "Quả bóng rổ ở dưới ghế.",
-  "mn": "Сагсан бөмбөг сандлын доор байна.",
-  "ja": "バスケットボールは椅子の下にあります。",
-  "au": "14-s12",
-  "g": 12
- },
- {
-  "zh": "妈妈的衣服在衣柜里吗？",
-  "py": "Māma de yīfu zài yīguì lǐ ma?",
-  "ko": "엄마의 옷은 옷장 안에 있어요?",
-  "en": "Are Mom's clothes in the wardrobe?",
-  "vi": "Quần áo của mẹ có ở trong tủ quần áo không?",
-  "mn": "Ээжийн хувцас хувцасны шүүгээнд байна уу?",
-  "ja": "お母さんの服はクローゼットの中にありますか？",
-  "au": "14-s13",
-  "g": 13
- },
- {
-  "zh": "妈妈的衣服在衣柜里。",
-  "py": "Māma de yīfu zài yīguì lǐ.",
-  "ko": "엄마의 옷은 옷장 안에 있어요.",
-  "en": "Mom's clothes are in the wardrobe.",
-  "vi": "Quần áo của mẹ ở trong tủ quần áo.",
-  "mn": "Ээжийн хувцас хувцасны шүүгээнд байна.",
-  "ja": "お母さんの服はクローゼットの中にあります。",
-  "au": "14-s14",
-  "g": 14
- },
- {
-  "zh": "报纸在不在电脑旁边？",
-  "py": "Bàozhǐ zài bu zài diànnǎo pángbiān?",
-  "ko": "신문은 컴퓨터 옆에 있어요, 없어요?",
-  "en": "Is the newspaper next to the computer?",
-  "vi": "Tờ báo có ở bên cạnh máy tính không?",
-  "mn": "Сонин компьютерийн хажууд байна уу?",
-  "ja": "新聞はパソコンのそばにありますか？",
-  "au": "14-s15",
-  "g": 15
- },
- {
-  "zh": "报纸在电脑旁边。",
-  "py": "Bàozhǐ zài diànnǎo pángbiān.",
-  "ko": "신문은 컴퓨터 옆에 있어요.",
-  "en": "The newspaper is next to the computer.",
-  "vi": "Tờ báo ở bên cạnh máy tính.",
-  "mn": "Сонин компьютерийн хажууд байна.",
-  "ja": "新聞はパソコンのそばにあります。",
-  "au": "14-s16",
-  "g": 16
- },
- {
-  "zh": "她的书在不在桌子上？",
-  "py": "Tā de shū zài bu zài zhuōzi shàng?",
-  "ko": "그녀의 책은 탁자 위에 있어요, 없어요?",
-  "en": "Is her book on the table?",
-  "vi": "Sách của cô ấy có ở trên bàn không?",
-  "mn": "Түүний ном ширээн дээр байна уу?",
-  "ja": "彼女の本は机の上にありますか？",
-  "au": "14-s17",
-  "g": 17
- },
- {
-  "zh": "她的书在桌子上。",
-  "py": "Tā de shū zài zhuōzi shàng.",
-  "ko": "그녀의 책은 탁자 위에 있어요.",
-  "en": "Her book is on the table.",
-  "vi": "Sách của cô ấy ở trên bàn.",
-  "mn": "Түүний ном ширээн дээр байна.",
-  "ja": "彼女の本は机の上にあります。",
-  "au": "14-s18",
-  "g": 18
- }
-], quiz:[
- {
-  "q": "“书柜在沙发后边。”에서 “后边”의 뜻은?",
-  "o": [
-   "앞",
-   "뒤",
-   "왼쪽"
-  ],
-  "a": 1
- },
- {
-  "q": "“电话在电脑右边。”의 뜻은?",
-  "o": [
-   "전화기는 컴퓨터 오른쪽에 있어요.",
-   "전화기는 컴퓨터 왼쪽에 있어요.",
-   "전화기는 컴퓨터 옆에 있어요."
-  ],
-  "a": 0
- },
- {
-  "q": "“她的书在不在桌子上？”은 무엇을 묻는 말인가요?",
-  "o": [
-   "그녀의 책이 얼마인지",
-   "그녀의 책이 어디에 있는지",
-   "그녀의 책이 탁자 위에 있는지 없는지"
-  ],
-  "a": 2
- }
-], vocab:[
- {
-  "zh": "餐桌",
-  "py": "cānzhuō",
-  "ko": "식탁",
-  "en": "dining table",
-  "vi": "bàn ăn",
-  "mn": "хоолны ширээ",
-  "ja": "ダイニングテーブル",
-  "au": "14-canzhuo"
- },
- {
-  "zh": "前边",
-  "py": "qiánbian",
-  "ko": "앞",
-  "en": "front, in front",
-  "vi": "phía trước",
-  "mn": "урд",
-  "ja": "前",
-  "au": "14-qianbian"
- },
- {
-  "zh": "书柜",
-  "py": "shūguì",
-  "ko": "책장",
-  "en": "bookcase",
-  "vi": "tủ sách",
-  "mn": "номын шүүгээ",
-  "ja": "本棚",
-  "au": "14-shugui"
- },
- {
-  "zh": "后边",
-  "py": "hòubian",
-  "ko": "뒤",
-  "en": "back, behind",
-  "vi": "phía sau",
-  "mn": "хойд тал, ард",
-  "ja": "後ろ",
-  "au": "14-houbian"
- },
- {
-  "zh": "左边",
-  "py": "zuǒbian",
-  "ko": "왼쪽",
-  "en": "left side",
-  "vi": "bên trái",
-  "mn": "зүүн тал",
-  "ja": "左",
-  "au": "14-zuobian"
- },
- {
-  "zh": "电脑",
-  "py": "diànnǎo",
-  "ko": "컴퓨터",
-  "en": "computer",
-  "vi": "máy tính",
-  "mn": "компьютер",
-  "ja": "パソコン",
-  "au": "14-diannao"
- },
- {
-  "zh": "右边",
-  "py": "yòubian",
-  "ko": "오른쪽",
-  "en": "right side",
-  "vi": "bên phải",
-  "mn": "баруун тал",
-  "ja": "右",
-  "au": "14-youbian"
- },
- {
-  "zh": "椅子",
-  "py": "yǐzi",
-  "ko": "의자",
-  "en": "chair",
-  "vi": "cái ghế",
-  "mn": "сандал",
-  "ja": "椅子",
-  "au": "14-yizi"
- },
- {
-  "zh": "衣柜",
-  "py": "yīguì",
-  "ko": "옷장",
-  "en": "wardrobe",
-  "vi": "tủ quần áo",
-  "mn": "хувцасны шүүгээ",
-  "ja": "クローゼット",
-  "au": "14-yigui"
- }
-]});
 const LANGS = {ko:'한국어', en:'English', vi:'Tiếng Việt', mn:'Монгол', ja:'日本語'};
 
 /* ============================= 앱 코드 ============================= */
 const KEY='zhapp:v2';
 let S = {name:'', lang:'ko', lesson:(LESSONS.find(l=>!l.draft)||LESSONS[0]).id, tab:'vocab', data:{}};
 try{ const r=localStorage.getItem(KEY); if(r) S=Object.assign(S, JSON.parse(r)); }catch(e){}
-if(S.tab==='exercise') S.tab='vocab';
-/* 이름은 수업 날짜가 바뀌면 지워서, 매 수업 시간마다 새로 입력하게 합니다 (진행 기록은 그대로) */
-function todayStr(){ const t=new Date(); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); }
-if(S.name && S.nameDate!==todayStr()){ S.name=''; S.nameDate=''; }
-if(!LESSONS.some(l=>l.id===S.lesson)) S.lesson=(LESSONS.find(l=>!l.draft)||LESSONS[0]).id;
-/* 12과를 문장 하나씩 나누면서 본문 기록 번호가 바뀌어, 이 폰의 12과 본문 기록을 한 번만 비웁니다 */
-try{ S.data=S.data||{}; const d12=S.data.l12||(S.data.l12={}); if(!d12.sp16){ delete d12.p; d12.sp16=true; } }catch(e){}
-/* 13과도 문장 하나씩으로 나누면서 본문 기록 번호가 바뀌어, 이 폰의 13과 본문 기록을 한 번만 비웁니다 */
-try{ const d13=S.data.l13||(S.data.l13={}); if(!d13.sp10){ delete d13.p; d13.sp10=true; } }catch(e){}
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 function blank(){ return {best:{},tried:{},self:{},marks:{},heard:{}}; }
 function D(id){
   const d=S.data[id]||(S.data[id]={});
   if(!d.p) d.p=blank();
+  if(!d.x) d.x=blank();
   if(!d.quiz) d.quiz={};
   if(!d.vq) d.vq={};
-  if(!d.vh) d.vh=[];
   if(!d.wdone) d.wdone={};
-  ['p'].forEach(k=>{ if(!d[k].marks) d[k].marks={}; if(!d[k].heard) d[k].heard={}; });
+  ['p','x'].forEach(k=>{ if(!d[k].marks) d[k].marks={}; if(!d[k].heard) d[k].heard={}; });
   return d;
 }
 const lesson=()=>LESSONS.find(l=>l.id===S.lesson)||LESSONS.find(l=>!l.draft)||LESSONS[0];
@@ -1121,39 +868,39 @@ const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const $=id=>document.getElementById(id);
 const KLABEL={p:'본문'};
 
+/* 13과: 단어 + 본문 */
+Object.assign(LESSONS.find(l=>l.id==='l13'),{draft:false, sentences:[{zh:'丈夫：我的钥匙在哪儿？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'13-s1'},{zh:'妻子：钥匙在桌子上。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'13-s2'},{zh:'丈夫：钥匙不在桌子上。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'13-s3'},{zh:'妻子：钥匙在不在沙发上？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'13-s4'},{zh:'丈夫：不在沙发上。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'13-s5'},{zh:'妻子：在不在沙发下边？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'13-s6'},{zh:'丈夫：也不在沙发下边。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'13-s7'},{zh:'妻子：在不在电话旁边？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'13-s8'},{zh:'丈夫：不在电话旁边。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'13-s9'},{zh:'妻子：你手里是什么？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'13-s10'}], vocab:[{zh:'丈夫', py:'zhangfu', ko:'남편', en:'', vi:'', mn:'', ja:'', au:'13-zhangfu'},{zh:'钥匙', py:'yaoshi', ko:'열쇠', en:'', vi:'', mn:'', ja:'', au:'13-yaoshi'},{zh:'在', py:'zai', ko:'~에 있다', en:'', vi:'', mn:'', ja:'', au:'13-zai'},{zh:'哪儿', py:'nar', ko:'어디', en:'', vi:'', mn:'', ja:'', au:'13-nar'},{zh:'妻子', py:'qizi', ko:'아내', en:'', vi:'', mn:'', ja:'', au:'13-qizi'},{zh:'桌子', py:'zhuozi', ko:'탁자, 책상', en:'', vi:'', mn:'', ja:'', au:'13-zhuozi'},{zh:'上', py:'shang', ko:'위', en:'', vi:'', mn:'', ja:'', au:'13-shang'},{zh:'沙发', py:'shafa', ko:'소파', en:'', vi:'', mn:'', ja:'', au:'13-shafa'},{zh:'下边', py:'xiabian', ko:'아래', en:'', vi:'', mn:'', ja:'', au:'13-xiabian'},{zh:'电话', py:'dianhua', ko:'전화', en:'', vi:'', mn:'', ja:'', au:'13-dianhua'},{zh:'旁边', py:'pangbian', ko:'옆', en:'', vi:'', mn:'', ja:'', au:'13-pangbian'},{zh:'手', py:'shou', ko:'손', en:'', vi:'', mn:'', ja:'', au:'13-shou'},{zh:'里', py:'li', ko:'안, 속', en:'', vi:'', mn:'', ja:'', au:'13-li'}]});
+/* 14과: 단어 + 본문 */
+Object.assign(LESSONS.find(l=>l.id==='l14'),{draft:false, sentences:[{zh:'A：餐桌在哪儿?', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'14-s1'},{zh:'B：餐桌在沙发前边。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'14-s2'},{zh:'A：书柜在哪儿?', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'14-s3'},{zh:'B：书柜在沙发后边。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'14-s4'},{zh:'A：桌子在哪儿?', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'14-s5'},{zh:'B：桌子在书柜左边。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'14-s6'},{zh:'A：电话在哪儿?', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'14-s7'},{zh:'B：电话在电脑右边。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'14-s8'},{zh:'A：茶在桌子上吗?', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'14-s9'},{zh:'B：茶在桌子上。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'14-s10'},{zh:'A：篮球在椅子下边吗?', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'14-s11'},{zh:'B：篮球在椅子下边。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'14-s12'},{zh:'A：妈妈的衣服在衣柜里吗?', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'14-s13'},{zh:'B：妈妈的衣服在衣柜里。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'14-s14'},{zh:'A：报纸在不在电脑旁边?', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'14-s15'},{zh:'B：报纸在电脑旁边。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'14-s16'},{zh:'A：她的书在不在桌子上?', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'14-s17'},{zh:'B：她的书在桌子上。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'14-s18'}], vocab:[{zh:'餐桌', py:'canzhuo', ko:'식탁', en:'', vi:'', mn:'', ja:'', au:'14-canzhuo'},{zh:'前边', py:'qianbian', ko:'앞', en:'', vi:'', mn:'', ja:'', au:'14-qianbian'},{zh:'书柜', py:'shugui', ko:'책장', en:'', vi:'', mn:'', ja:'', au:'14-shugui'},{zh:'后边', py:'houbian', ko:'뒤', en:'', vi:'', mn:'', ja:'', au:'14-houbian'},{zh:'左边', py:'zuobian', ko:'왼쪽', en:'', vi:'', mn:'', ja:'', au:'14-zuobian'},{zh:'电脑', py:'diannao', ko:'컴퓨터', en:'', vi:'', mn:'', ja:'', au:'14-diannao'},{zh:'右边', py:'youbian', ko:'오른쪽', en:'', vi:'', mn:'', ja:'', au:'14-youbian'},{zh:'椅子', py:'yizi', ko:'의자', en:'', vi:'', mn:'', ja:'', au:'14-yizi'},{zh:'衣柜', py:'yigui', ko:'옷장', en:'', vi:'', mn:'', ja:'', au:'14-yigui'}]});
+/* 15과: 단어 + 본문 */
+Object.assign(LESSONS.find(l=>l.id==='l15'),{draft:false, sentences:[{zh:'妻子：这条红色的裙子好看吗？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'15-s1'},{zh:'丈夫：好看。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'15-s2'},{zh:'妻子：这条白色的裙子好看吗？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'15-s3'},{zh:'丈夫：好看。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'15-s4'},{zh:'妻子：这条黄色的裙子呢？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'15-s5'},{zh:'丈夫：好看。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'15-s6'},{zh:'妻子：这条绿色的大衣怎么样？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'15-s7'},{zh:'丈夫：好看。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'15-s8'},{zh:'妻子：这条蓝色的大衣呢？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'15-s9'},{zh:'丈夫：好看。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'15-s10'},{zh:'妻子：你看没看？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'15-s11'},{zh:'丈夫：你穿什么都好看。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'15-s12'}], vocab:[{zh:'条', py:'tiao', ko:'폭이 좁고 긴 사물을 세는 단위', en:'', vi:'', mn:'', ja:'', au:'15-tiao'},{zh:'红色', py:'hongse', ko:'빨간색', en:'', vi:'', mn:'', ja:'', au:'15-hongse'},{zh:'裙子', py:'qunzi', ko:'치마', en:'', vi:'', mn:'', ja:'', au:'15-qunzi'},{zh:'好看', py:'haokan', ko:'예쁘다, 보기 좋다', en:'', vi:'', mn:'', ja:'', au:'15-haokan'},{zh:'白色', py:'baise', ko:'흰색', en:'', vi:'', mn:'', ja:'', au:'15-baise'},{zh:'黄色', py:'huangse', ko:'노란색', en:'', vi:'', mn:'', ja:'', au:'15-huangse'},{zh:'件', py:'jian', ko:'벌, 건(옷, 일 등을 세는 단위)', en:'', vi:'', mn:'', ja:'', au:'15-jian'},{zh:'绿色', py:'lvse', ko:'녹색', en:'', vi:'', mn:'', ja:'', au:'15-lvse'},{zh:'大衣', py:'dayi', ko:'외투', en:'', vi:'', mn:'', ja:'', au:'15-dayi'},{zh:'怎么样', py:'zenmeyang', ko:'어떠한가', en:'', vi:'', mn:'', ja:'', au:'15-zenmeyang'},{zh:'蓝色', py:'lanse', ko:'파란색', en:'', vi:'', mn:'', ja:'', au:'15-lanse'},{zh:'没', py:'mei', ko:'~않다(과거 행위에 대한 부정)', en:'', vi:'', mn:'', ja:'', au:'15-mei'},{zh:'穿', py:'chuan', ko:'(옷을)입다, (신발을)신다', en:'', vi:'', mn:'', ja:'', au:'15-chuan'}]});
+/* 16과: 단어 + 본문 */
+Object.assign(LESSONS.find(l=>l.id==='l16'),{draft:false, sentences:[{zh:'A：这双棕色的鞋舒服吗？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'16-s1'},{zh:'B：这双棕色的鞋很舒服。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'16-s2'},{zh:'A：这条蓝色的裤子好看吗？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'16-s3'},{zh:'B：这条蓝色的裤子很好看。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'16-s4'},{zh:'A：这条绿色的裙子漂亮不漂亮？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'16-s5'},{zh:'B：这条绿色的裙子很漂亮。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'16-s6'},{zh:'A：这件灰色的衬衣好看不好看？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'16-s7'},{zh:'B：这件灰色的衬衣很好看。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'16-s8'},{zh:'A：这件蓝色的旗袍好看不好看？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'16-s9'},{zh:'B：这件蓝色的旗袍不好看。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'16-s10'},{zh:'A：这件红色的大衣怎么样？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'16-s11'},{zh:'B：这件红色的大衣很漂亮。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'16-s12'},{zh:'A：这个黑色的手机怎么样？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'16-s13'},{zh:'B：这个黑色的手机不好看。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'16-s14'},{zh:'A：这个白色的餐桌怎么样？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'16-s15'},{zh:'B：这个白色的餐桌很漂亮。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'16-s16'},{zh:'A：这个黄色的沙发怎么样？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'16-s17'},{zh:'B：这个黄色的沙发很舒服。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'16-s18'}], vocab:[{zh:'双', py:'shuang', ko:'켤레(쌍으로 된 것을 세는 단위)', en:'', vi:'', mn:'', ja:'', au:'16-shuang'},{zh:'棕色', py:'zongse', ko:'갈색', en:'', vi:'', mn:'', ja:'', au:'16-zongse'},{zh:'鞋', py:'xie', ko:'신발', en:'', vi:'', mn:'', ja:'', au:'16-xie'},{zh:'舒服', py:'shufu', ko:'편안하다', en:'', vi:'', mn:'', ja:'', au:'16-shufu'},{zh:'裤子', py:'kuzi', ko:'바지', en:'', vi:'', mn:'', ja:'', au:'16-kuzi'},{zh:'灰色', py:'huise', ko:'회색', en:'', vi:'', mn:'', ja:'', au:'16-huise'},{zh:'衬衣', py:'chenyi', ko:'셔츠, 블라우스', en:'', vi:'', mn:'', ja:'', au:'16-chenyi'},{zh:'旗袍', py:'qipao', ko:'치파오(중국전통의상)', en:'', vi:'', mn:'', ja:'', au:'16-qipao'},{zh:'黑色', py:'heise', ko:'검은색', en:'', vi:'', mn:'', ja:'', au:'16-heise'},{zh:'手机', py:'shouji', ko:'휴대전화', en:'', vi:'', mn:'', ja:'', au:'16-shouji'}]});
+/* 17과: 단어 + 본문 */
+Object.assign(LESSONS.find(l=>l.id==='l17'),{draft:false, sentences:[{zh:'阿里：老师，中国有哪些传统节日？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'17-s1'},{zh:'老师：中国有春节，元宵节，中秋节……', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'17-s2'},{zh:'阿里：春节是几月几号？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'17-s3'},{zh:'老师：春节是农历一月一日。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'17-s4'},{zh:'阿里：元宵节是几月几日？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'17-s5'},{zh:'老师：元宵节是农历一月十五日？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'17-s6'},{zh:'阿里：中秋节呢？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'17-s7'},{zh:'老师：中秋节是农历八月十五日', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'17-s8'},{zh:'阿里：中国有情人节吗？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'17-s9'},{zh:'老师：有，中国的情人节是农历七月七日。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'17-s10'},{zh:'阿里：二零一二年中国情人节是哪天？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'17-s11'},{zh:'老师：是二零一二年八月二十三日，星期四。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'17-s12'}], vocab:[{zh:'哪些', py:'naxie', ko:'어떤 것들', en:'', vi:'', mn:'', ja:'', au:'17-naxie'},{zh:'传统', py:'chuantong', ko:'전통의', en:'', vi:'', mn:'', ja:'', au:'17-chuantong'},{zh:'节日', py:'jieri', ko:'명절, 기념일', en:'', vi:'', mn:'', ja:'', au:'17-jieri'},{zh:'春节', py:'chunjie', ko:'설날', en:'', vi:'', mn:'', ja:'', au:'17-chunjie'},{zh:'元宵节', py:'yuanxiaojie', ko:'정월대보름', en:'', vi:'', mn:'', ja:'', au:'17-yuanxiaojie'},{zh:'中秋节', py:'zhongqiujie', ko:'추석', en:'', vi:'', mn:'', ja:'', au:'17-zhongqiujie'},{zh:'月', py:'yue', ko:'월, 달', en:'', vi:'', mn:'', ja:'', au:'17-yue'},{zh:'日', py:'ri', ko:'일, 날', en:'', vi:'', mn:'', ja:'', au:'17-ri'},{zh:'农历', py:'nongli', ko:'음력', en:'', vi:'', mn:'', ja:'', au:'17-nongli'},{zh:'情人节', py:'qingrenjie', ko:'연인의 날', en:'', vi:'', mn:'', ja:'', au:'17-qingrenjie'},{zh:'年', py:'nian', ko:'년, 해', en:'', vi:'', mn:'', ja:'', au:'17-nian'},{zh:'天', py:'tian', ko:'날, 하늘', en:'', vi:'', mn:'', ja:'', au:'17-tian'},{zh:'星期四', py:'xingqisi', ko:'목요일', en:'', vi:'', mn:'', ja:'', au:'17-xingqisi'},{zh:'星期', py:'xingqi', ko:'주', en:'', vi:'', mn:'', ja:'', au:'17-xingqi'}]});
+/* 18과: 단어 + 본문 */
+Object.assign(LESSONS.find(l=>l.id==='l18'),{draft:false, sentences:[{zh:'A：元宵节是几月几日？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'18-s1'},{zh:'B：元宵节是农历一月十五日。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'18-s2'},{zh:'A：劳动节是几月几号？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'18-s3'},{zh:'B：劳动节是五月一号。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'18-s4'},{zh:'A：今年复活节是哪天？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'18-s5'},{zh:'B：今年复活节是四月八号。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'18-s6'},{zh:'A：二零一五年父亲节是哪天？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'18-s7'},{zh:'B：二零一五年父亲节是六月二十一号。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'18-s8'},{zh:'A：母亲节是星期几？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'18-s9'},{zh:'B：母亲节是星期天。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'18-s10'},{zh:'A：今年圣诞节是星期几？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'18-s11'},{zh:'B：今年圣诞节是星期二。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'18-s12'}], vocab:[{zh:'劳动节', py:'laodongjie', ko:'노동절', en:'', vi:'', mn:'', ja:'', au:'18-laodongjie'},{zh:'号', py:'hao', ko:'일(구어표현)', en:'', vi:'', mn:'', ja:'', au:'18-hao'},{zh:'今年', py:'jinian', ko:'올해, 금년', en:'', vi:'', mn:'', ja:'', au:'18-jinian'},{zh:'复活节', py:'fuhuojie', ko:'부활절', en:'', vi:'', mn:'', ja:'', au:'18-fuhuojie'},{zh:'父亲节', py:'fuqinjie', ko:'아버지의 날', en:'', vi:'', mn:'', ja:'', au:'18-fuqinjie'},{zh:'母亲节', py:'muqinjie', ko:'어머니의 날', en:'', vi:'', mn:'', ja:'', au:'18-muqinjie'},{zh:'星期几', py:'xingqiji', ko:'무슨 요일', en:'', vi:'', mn:'', ja:'', au:'18-xingqiji'},{zh:'星期天', py:'xingqitian', ko:'일요일', en:'', vi:'', mn:'', ja:'', au:'18-xingqitian'},{zh:'圣诞节', py:'shengdanjie', ko:'크리스마스', en:'', vi:'', mn:'', ja:'', au:'18-shengdanjie'},{zh:'星期二', py:'xingqier', ko:'화요일', en:'', vi:'', mn:'', ja:'', au:'18-xingqier'}]});
+/* 19과: 단어 + 본문 */
+Object.assign(LESSONS.find(l=>l.id==='l19'),{draft:false, sentences:[{zh:'服务员：请问，您要什么？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'19-s1'},{zh:'林木：我要一碗面条儿。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'19-s2'},{zh:'服务员：您要大碗的还是小碗的？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'19-s3'},{zh:'林木：大碗的。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'19-s4'},{zh:'服务员：辣的还是不辣的？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'19-s5'},{zh:'林木：不辣的。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'19-s6'},{zh:'林木：再要一杯豆浆。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'19-s7'},{zh:'服务员：要热的还是凉的。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'19-s8'},{zh:'林木：凉的。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'19-s9'},{zh:'服务员：一共五十快。现金还是刷卡？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'19-s10'},{zh:'林木：刷卡。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'19-s11'}], vocab:[{zh:'要', py:'yao', ko:'원하다, 필요로 하다', en:'', vi:'', mn:'', ja:'', au:'19-yao'},{zh:'碗', py:'wan', ko:'그릇, 공기', en:'', vi:'', mn:'', ja:'', au:'19-wan'},{zh:'面条儿', py:'miantiaoer', ko:'국수', en:'', vi:'', mn:'', ja:'', au:'19-miantiaoer'},{zh:'大', py:'da', ko:'크다', en:'', vi:'', mn:'', ja:'', au:'19-da'},{zh:'还是', py:'haishi', ko:'또는, 아니면', en:'', vi:'', mn:'', ja:'', au:'19-haishi'},{zh:'小', py:'xiao', ko:'작다', en:'', vi:'', mn:'', ja:'', au:'19-xiao'},{zh:'辣', py:'la', ko:'맵다', en:'', vi:'', mn:'', ja:'', au:'19-la'},{zh:'再', py:'zai', ko:'더, 다시', en:'', vi:'', mn:'', ja:'', au:'19-zai'},{zh:'杯', py:'bei', ko:'잔, 컵', en:'', vi:'', mn:'', ja:'', au:'19-bei'},{zh:'豆浆', py:'doujiang', ko:'콩물', en:'', vi:'', mn:'', ja:'', au:'19-doujiang'},{zh:'热', py:'re', ko:'뜨겁다, 덥다', en:'', vi:'', mn:'', ja:'', au:'19-re'},{zh:'凉', py:'liang', ko:'차갑다, 서늘하다', en:'', vi:'', mn:'', ja:'', au:'19-liang'},{zh:'一共', py:'yigong', ko:'모두', en:'', vi:'', mn:'', ja:'', au:'19-yigong'},{zh:'块', py:'kuai', ko:'콰이(중국화폐단위)', en:'', vi:'', mn:'', ja:'', au:'19-kuai'},{zh:'现金', py:'xianjin', ko:'현금', en:'', vi:'', mn:'', ja:'', au:'19-xianjin'},{zh:'刷卡', py:'shuaka', ko:'카드로 계산하다', en:'', vi:'', mn:'', ja:'', au:'19-shuaka'}]});
+/* 20과: 단어 + 본문 */
+Object.assign(LESSONS.find(l=>l.id==='l20'),{draft:false, sentences:[{zh:'A：请问，您要什么？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s1'},{zh:'B：我要一个汉堡。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s2'},{zh:'A：您要大的还是小的？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s3'},{zh:'B：大的。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s4'},{zh:'A：请问，您要什么？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s5'},{zh:'B：我要一个比萨饼。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s6'},{zh:'A：您要大的还是小的？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s7'},{zh:'B：小的。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s8'},{zh:'A：请问，您要什么？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s9'},{zh:'B：我要一杯水。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s10'},{zh:'A：您要凉的还是热的？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s11'},{zh:'B：热的。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s12'},{zh:'A：请问，您要什么？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s13'},{zh:'B：我要一杯豆浆。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s14'},{zh:'A：您要甜的还是咸的？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s15'},{zh:'B：甜的。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s16'},{zh:'A：请问，您要什么？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s17'},{zh:'B：我要一个汉堡。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s18'},{zh:'A：您要辣的还是不辣的？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s19'},{zh:'B：不辣的。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s20'},{zh:'A：请问，您要什么？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s21'},{zh:'B：我要一斤饺子。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s22'},{zh:'A：您要羊肉的还是牛肉的？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s23'},{zh:'B：牛肉的。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s24'},{zh:'A：请问，您要什么？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s25'},{zh:'B：我要一碗米饭。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s26'},{zh:'A：您要大碗的还是小碗的？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s27'},{zh:'B：小碗的。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s28'},{zh:'A：请问，您要什么？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s29'},{zh:'B：我要一杯咖啡。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s30'},{zh:'A：您要大杯的还是小杯的？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s31'},{zh:'B：大杯的。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s32'},{zh:'A：请问，您要什么？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s33'},{zh:'B：我要一瓶可乐。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s34'},{zh:'A：您要大瓶的还是小瓶的？', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s35'},{zh:'B：大瓶的。', py:'', ko:'', en:'', vi:'', mn:'', ja:'', au:'20-s36'}], vocab:[{zh:'汉堡', py:'hanbao', ko:'햄버거', en:'', vi:'', mn:'', ja:'', au:'20-hanbao'},{zh:'比萨饼', py:'bisabing', ko:'피자', en:'', vi:'', mn:'', ja:'', au:'20-bisabing'},{zh:'水', py:'shui', ko:'물', en:'', vi:'', mn:'', ja:'', au:'20-shui'},{zh:'甜', py:'tian', ko:'달다', en:'', vi:'', mn:'', ja:'', au:'20-tian'},{zh:'咸', py:'xian', ko:'짜다', en:'', vi:'', mn:'', ja:'', au:'20-xian'},{zh:'斤', py:'jin', ko:'근', en:'', vi:'', mn:'', ja:'', au:'20-jin'},{zh:'饺子', py:'jiaozi', ko:'(소가 든 반달 모양)만두', en:'', vi:'', mn:'', ja:'', au:'20-jiaozi'},{zh:'羊肉', py:'yangrou', ko:'양고기', en:'', vi:'', mn:'', ja:'', au:'20-yangrou'},{zh:'牛肉', py:'niurou', ko:'소고기', en:'', vi:'', mn:'', ja:'', au:'20-niurou'},{zh:'米饭', py:'mifan', ko:'쌀밥', en:'', vi:'', mn:'', ja:'', au:'20-mifan'},{zh:'咖啡', py:'kafei', ko:'커피', en:'', vi:'', mn:'', ja:'', au:'20-kafei'},{zh:'瓶', py:'ping', ko:'병', en:'', vi:'', mn:'', ja:'', au:'20-ping'},{zh:'可乐', py:'kele', ko:'콜라', en:'', vi:'', mn:'', ja:'', au:'20-kele'}]});
+
 /* ----- 상태 계산 ----- */
-/* k: 'p' = 본문 / 카드 하나 = 문장 또는 문답 하나 = 통과 단위 */
-const items=(l,k)=> l.sentences;
+/* k: 'p' = 본문, 'x' = 연습 / 카드 하나 = 문장 또는 문답 하나 = 통과 단위 */
+const items=(l,k)=>l.sentences;
 function iPass(l,k,i){ const d=D(l.id)[k]; return (d.best[i]!=null && d.best[i]>=l.threshold) || !!d.self[i]; }
 function kCount(l,k){ return items(l,k).filter((_,i)=>iPass(l,k,i)).length; }
 function kPass(l,k){ const arr=items(l,k); return arr.length>0 && arr.every((_,i)=>iPass(l,k,i)); }
-function cardTotals(l){
-  let p=0,t=0;
-  ['p'].forEach(k=>{ t+=items(l,k).length; p+=kCount(l,k); });
-  return [p,t];
-}
+function hasEx(l){ return false; }
+function cardTotals(l){ const arr=items(l,'p'); return [kCount(l,'p'),arr.length]; }
 function quizDone(l){ return Object.keys(D(l.id).quiz).length===l.quiz.length; }
 function quizScore(l){ const d=D(l.id); return l.quiz.filter((q,i)=>d.quiz[i]===q.a).length; }
 function vocabDone(l){ return !l.vocab.length || Object.keys(D(l.id).vq).length===l.vocab.length; }
 function vocabScore(l){ const d=D(l.id); return l.vocab.filter((_,i)=>d.vq[i]===i).length; }
-function vocabPct(l){ return l.vocab.length? Math.round(vocabScore(l)/l.vocab.length*100) : 0; }
-/* 단어퀴즈 시도 기록: 끝낸 시도마다 맞힌 개수를 남김 (다시 풀기를 눌러도 기록은 지워지지 않음) */
-function vocabHist(l){
-  const d=D(l.id);
-  if(vocabDone(l) && l.vocab.length && d.vh.length===0){ d.vh.push(vocabScore(l)); save(); }
-  return d.vh;
-}
-function histText(l, sep){
-  const h=vocabHist(l), n=l.vocab.length||1;
-  const pcts=h.map(x=>Math.round(x/n*100)+'%');
-  const shown=pcts.length>8 ? ['…'].concat(pcts.slice(-8)) : pcts;
-  return {count:h.length, text:shown.join(sep||' → ')};
-}
-function lessonPass(l){ return kPass(l,'p') && vocabDone(l) && quizDone(l); }
+function vocabPass(l){ return vocabDone(l); }
+function lessonPass(l){ return kPass(l,'p') && vocabPass(l) && quizDone(l); }
 function tabsOf(l){
-  const T=[['vocab','🔤','단어'],['practice','🎙','본문']];
-  T.push(['quiz','✏️','퀴즈'],['card','🪪','제출']);
-  return T;
+  return [['vocab','🔤','단어'],['practice','🎙','본문'],['quiz','✏️','퀴즈'],['card','🪪','제출']];
 }
 
 /* ----- 음성 합성 / 녹음 ----- */
@@ -1436,7 +1183,7 @@ function listHTML(l,k){
 
 function renderChips(){
   const st=$('subtitle'); if(st) st.textContent=ORDER[S.lang]||ORDER.ko;
-  $('chips').innerHTML=LESSONS.map(l=>{
+  $('chips').innerHTML=LESSONS.filter(l=>{const n=parseInt(l.id.slice(1),10); return n>=11&&n<=20;}).map(l=>{
     const done=lessonPass(l), gt=cardTotals(l);
     return '<button class="chip '+(l.id===S.lesson?'on':'')+(done?' done':'')+'" data-act="lesson" data-id="'+l.id+'"><b>'+esc(l.title)+'</b><span>'+(l.draft?'준비 중':(l.sentences.length?(l.level?esc(l.level)+' · ':'')+(done?'✔ 통과':'문장 '+gt[0]+'/'+gt[1]):'단어 먼저 · 본문 준비 중'))+'</span></button>';
   }).join('');
@@ -1446,34 +1193,34 @@ function renderChips(){
 /* ----- 단어 탭 문구 (언어별) / 단어퀴즈 보기는 모든 언어에서 한글 ----- */
 const VI18N={
   ko:{listHead:n=>'단어 ('+n+')', quizHead:'단어퀴즈', quizNote:'',
-      result:(x,n,pct)=>'결과: '+n+'문제 중 '+x+'문제 맞힘 ('+pct+'%)', retry:'단어 다시 풀기', tries:(n,t)=>'시도 '+n+'회 · '+t, listen:'듣기',
+      result:(x,n,p)=>'결과: '+x+' / '+n+'문제 정답 · 정답률 '+(n?((x/n)*100).toFixed(1):'0')+'%', retry:'단어 다시 풀기', listen:'듣기',
       speak:'🎙 말하기', stop:'■ 끝내기', mine:'▶ 내 소리', cmp:'⇄ 비교하기',
       micFail:'마이크를 사용할 수 없어요. 브라우저의 마이크 허용을 확인하세요.'},
-  en:{listHead:n=>'Words ('+n+')', quizHead:'Word quiz (단어퀴즈)', quizNote:'The answer choices are in Korean.',
-      result:(x,n,pct)=>'Result: '+x+' of '+n+' correct ('+pct+'%)', retry:'Try again', tries:(n,t)=>'Attempts: '+n+' · '+t, listen:'Listen',
+  en:{listHead:n=>'Words ('+n+')', quizHead:'Match the meaning (단어퀴즈)', quizNote:'The answer choices are in Korean.',
+      result:(x,n,p)=>'Result: '+x+' / '+n+' correct · '+(n?((x/n)*100).toFixed(1):'0')+'%', retry:'Try again', listen:'Listen',
       speak:'🎙 Speak', stop:'■ Stop', mine:'▶ My voice', cmp:'⇄ Compare',
       micFail:'Cannot use the microphone. Please allow microphone access in your browser.'},
-  vi:{listHead:n=>'Từ vựng ('+n+')', quizHead:'Trắc nghiệm từ vựng (단어퀴즈)', quizNote:'Các đáp án bằng tiếng Hàn.',
-      result:(x,n,pct)=>'Kết quả: đúng '+x+'/'+n+' câu ('+pct+'%)', retry:'Làm lại', tries:(n,t)=>'Số lần làm: '+n+' · '+t, listen:'Nghe',
+  vi:{listHead:n=>'Từ vựng ('+n+')', quizHead:'Chọn nghĩa (단어퀴즈)', quizNote:'Các đáp án bằng tiếng Hàn.',
+      result:(x,n,p)=>'Kết quả: '+x+' / '+n+' đúng · '+(n?((x/n)*100).toFixed(1):'0')+'%', retry:'Làm lại', listen:'Nghe',
       speak:'🎙 Nói', stop:'■ Dừng', mine:'▶ Giọng tôi', cmp:'⇄ So sánh',
       micFail:'Không dùng được micro. Hãy cho phép micro trong trình duyệt.'},
-  mn:{listHead:n=>'Үгс ('+n+')', quizHead:'Үгийн тест (단어퀴즈)', quizNote:'Хариултууд солонгос хэлээр байна.',
-      result:(x,n,pct)=>'Үр дүн: '+n+'-аас '+x+' зөв ('+pct+'%)', retry:'Дахин хийх', tries:(n,t)=>'Оролдлого: '+n+' · '+t, listen:'Сонсох',
+  mn:{listHead:n=>'Үгс ('+n+')', quizHead:'Утга таах (단어퀴즈)', quizNote:'Хариултууд солонгос хэлээр байна.',
+      result:(x,n,p)=>'Үр дүн: '+x+' / '+n+' зөв · '+(n?((x/n)*100).toFixed(1):'0')+'%', retry:'Дахин хийх', listen:'Сонсох',
       speak:'🎙 Хэлэх', stop:'■ Зогсоох', mine:'▶ Миний дуу', cmp:'⇄ Харьцуулах',
       micFail:'Микрофоныг ашиглах боломжгүй байна. Хөтөч дээрээ микрофоныг зөвшөөрнө үү.'},
-  ja:{listHead:n=>'単語 ('+n+')', quizHead:'単語クイズ（단어퀴즈）', quizNote:'選択肢は韓国語です。',
-      result:(x,n,pct)=>'結果：'+n+'問中'+x+'問正解（'+pct+'％）', retry:'もう一度解く', tries:(n,t)=>'挑戦回数：'+n+'回 · '+t, listen:'聞く',
+  ja:{listHead:n=>'単語 ('+n+')', quizHead:'意味当て（단어퀴즈）', quizNote:'選択肢は韓国語です。',
+      result:(x,n,p)=>'結果: '+x+' / '+n+'問正解 · 正答率 '+(n?((x/n)*100).toFixed(1):'0')+'%', retry:'もう一度解く', listen:'聞く',
       speak:'🎙 話す', stop:'■ 止める', mine:'▶ 自分の声', cmp:'⇄ 聞き比べ',
       micFail:'マイクを使えません。ブラウザでマイクを許可してください。'}
 };
 const VT=()=>VI18N[S.lang]||VI18N.ko;
 /* 단어·본문 영역에 보이는 학습 순서 안내 (탭 이름은 한글 그대로 두고 괄호로 뜻을 알려 줌) */
 const ORDER={
-  ko:'① 이름 입력 → ② 단어 → ③ 본문 → ④ 퀴즈 순서로 해 보세요.',
-  en:'Order: ① Name → ② Words → ③ Text → ④ Quiz',
-  vi:'Thứ tự: ① Tên → ② Từ vựng → ③ Bài khóa → ④ Trắc nghiệm',
-  mn:'Дараалал: ① Нэр → ② Үгс → ③ Хичээлийн эх → ④ Тест',
-  ja:'順番: ① 名前 → ② 単語 → ③ 本文 → ④ クイズ'
+  ko:'① 단어 → ② 본문 → ③ 퀴즈 순서로 해 보세요.',
+  en:'Please go in this order: ① 단어 (Words) → ② 본문 (Text) → ③ 퀴즈 (Quiz)',
+  vi:'Hãy làm theo thứ tự: ① 단어 (Từ vựng) → ② 본문 (Bài khóa) → ③ 퀴즈 (Trắc nghiệm)',
+  mn:'Дараах дарааллаар хийнэ үү: ① 단어 (Үгс) → ② 본문 (Хичээлийн эх) → ③ 퀴즈 (Тест)',
+  ja:'次の順番で進めましょう：① 단어（単語）→ ② 본문（本文）→ ③ 퀴즈（クイズ）'
 };
 /* 퀴즈 영역 안내 */
 const QUIZ_GUIDE={
@@ -1499,39 +1246,39 @@ const VHELP={
     '단어를 듣고, 말하기를 클릭한 후 단어를 말하고, 비교하기를 클릭해서 원어민 발음과 비교해 보세요.',
     '말하기는 끝내기 버튼을 클릭해야 녹음이 완료됩니다.',
     '모든 단어 연습이 끝나면 아래 “단어퀴즈”를 풀어보세요.',
-    '단어퀴즈를 끝내면 몇 문제 맞혔는지(%)가 표시됩니다.']},
+    '단어퀴즈를 풀면 정답 수와 정답률을 확인할 수 있습니다.']},
   en:{title:'Word practice guide (단어 연습 안내)', items:[
     'Listen to the word, press “Speak (말하기)”, say the word, then press “Compare (비교하기)” to compare with the native pronunciation.',
     'Press “Stop (끝내기)” to finish the recording.',
-    'When you have practiced all the words, do “Word quiz (단어퀴즈)” below.',
-    'When you finish “Word quiz (단어퀴즈)”, you will see how many you got right (%).',
+    'When you have practiced all the words, do “Match the meaning (단어퀴즈)” below.',
+    'The result shows the number correct and the percentage.',
     'For the exact meaning of each word, please check your textbook.']},
   vi:{title:'Hướng dẫn luyện từ vựng (단어 연습 안내)', items:[
     'Nghe từ, bấm “Nói (말하기)”, đọc từ đó, rồi bấm “So sánh (비교하기)” để so sánh với phát âm của người bản ngữ.',
     'Phải bấm “Dừng (끝내기)” thì bản ghi âm mới hoàn tất.',
-    'Khi luyện xong tất cả các từ, hãy làm phần “Trắc nghiệm từ vựng (단어퀴즈)” bên dưới.',
-    'Làm xong phần “Trắc nghiệm từ vựng (단어퀴즈)”, bạn sẽ thấy mình đúng bao nhiêu câu (%).',
+    'Khi luyện xong tất cả các từ, hãy làm phần “Chọn nghĩa (단어퀴즈)” bên dưới.',
+    'Kết quả cho biết số câu đúng và tỷ lệ đúng.',
     'Nghĩa chính xác của từ, vui lòng xem trong giáo trình.']},
   mn:{title:'Үгийн дасгалын заавар (단어 연습 안내)', items:[
     'Үгийг сонсоод “Хэлэх (말하기)” товчийг дарж, үгийг хэлээд, “Харьцуулах (비교하기)” товчийг дарж эх хэлтний дуудлагатай харьцуулаарай.',
     '“Зогсоох (끝내기)” товчийг дарж байж бичлэг дуусна.',
-    'Бүх үгийн дасгалыг дуусгасны дараа доорх “Үгийн тест (단어퀴즈)”-г хийгээрэй.',
-    '“Үгийн тест (단어퀴즈)”-ийг дуусгавал хэдэн асуултад зөв хариулсан (%) нь харагдана.',
+    'Бүх үгийн дасгалыг дуусгасны дараа доорх “Утга таах (단어퀴즈)”-г хийгээрэй.',
+    'Үр дүнд зөв хариултын тоо болон хувийг харуулна.',
     'Үгийн яг утгыг сурах бичгээсээ шалгана уу.']},
   ja:{title:'単語練習のご案内 (단어 연습 안내)', items:[
     '単語を聞いて、「話す（말하기）」を押して単語を言い、「聞き比べ（비교하기）」を押してネイティブの発音と比べましょう。',
     '「止める（끝내기）」を押すと録音が完了します。',
-    'すべての単語の練習が終わったら、下の「単語クイズ（단어퀴즈）」を解きましょう。',
-    '「単語クイズ（단어퀴즈）」を終えると、何問正解したか（％）が表示されます。',
-    '正確な単語の意味は教科書を参照してください。']}
+    'すべての単語の練習が終わったら、下の「意味当て（단어퀴즈）」を解きましょう。',
+    '結果には正解数と正答率が表示されます。',
+    '結果には正解数と正答率が表示されます。']}
 };
 /* 단어 말하기를 모두 마치면 “단어퀴즈” 버튼이 열리고, 열면 단어 목록은 접힘 */
 const VGATE={
   ko:{progress:(x,n)=>'단어 말하기 '+x+' / '+n+' 완료', lock:'모든 단어를 말해 보면 “단어퀴즈”를 시작할 수 있어요.', ready:'단어 말하기를 모두 마쳤어요. 이제 단어퀴즈를 시작하세요.', startBtn:'단어퀴즈'},
-  en:{progress:(x,n)=>'Speaking practice: '+x+' / '+n+' done', lock:'Practice speaking all the words to start “Word quiz (단어퀴즈)”.', ready:'You have finished speaking all the words. Now start “Word quiz (단어퀴즈)”.', startBtn:'단어퀴즈'},
-  vi:{progress:(x,n)=>'Đã luyện nói: '+x+' / '+n+' từ', lock:'Hãy luyện nói tất cả các từ để bắt đầu “Trắc nghiệm từ vựng (단어퀴즈)”.', ready:'Bạn đã luyện nói xong tất cả các từ. Bây giờ hãy bắt đầu “Trắc nghiệm từ vựng (단어퀴즈)”.', startBtn:'단어퀴즈'},
-  mn:{progress:(x,n)=>'Хэлэх дасгал: '+x+' / '+n+' дууссан', lock:'Бүх үгийг хэлж дасгалжсаны дараа “Үгийн тест (단어퀴즈)”-г эхлүүлж болно.', ready:'Бүх үгийг хэлж дасгалжууллаа. Одоо “Үгийн тест (단어퀴즈)”-г эхлүүлээрэй.', startBtn:'단어퀴즈'},
-  ja:{progress:(x,n)=>'話す練習：'+x+' / '+n+' 完了', lock:'すべての単語を話して練習すると、「単語クイズ（단어퀴즈）」を始められます。', ready:'すべての単語を話し終えました。「単語クイズ（단어퀴즈）」を始めましょう。', startBtn:'단어퀴즈'}
+  en:{progress:(x,n)=>'Speaking practice: '+x+' / '+n+' done', lock:'Practice speaking all the words to start “Match the meaning (단어퀴즈)”.', ready:'You have finished speaking all the words. Now start “Match the meaning (단어퀴즈)”.', startBtn:'단어퀴즈'},
+  vi:{progress:(x,n)=>'Đã luyện nói: '+x+' / '+n+' từ', lock:'Hãy luyện nói tất cả các từ để bắt đầu “Chọn nghĩa (단어퀴즈)”.', ready:'Bạn đã luyện nói xong tất cả các từ. Bây giờ hãy bắt đầu “Chọn nghĩa (단어퀴즈)”.', startBtn:'단어퀴즈'},
+  mn:{progress:(x,n)=>'Хэлэх дасгал: '+x+' / '+n+' дууссан', lock:'Бүх үгийг хэлж дасгалжсаны дараа “Утга таах (단어퀴즈)”-г эхлүүлж болно.', ready:'Бүх үгийг хэлж дасгалжууллаа. Одоо “Утга таах (단어퀴즈)”-г эхлүүлээрэй.', startBtn:'단어퀴즈'},
+  ja:{progress:(x,n)=>'話す練習：'+x+' / '+n+' 完了', lock:'すべての単語を話して練習すると、「意味当て（단어퀴즈）」を始められます。', ready:'すべての単語を話し終えました。「意味当て（단어퀴즈）」を始めましょう。', startBtn:'단어퀴즈'}
 };
 const VG=()=>VGATE[S.lang]||VGATE.ko;
 function wordsDoneCount(l){ const d=D(l.id); return l.vocab.filter((_,i)=>d.wdone[i]).length; }
@@ -1665,8 +1412,9 @@ function drillView(l,k){
   if(synth && voicesKnown>0 && !zhVoice) h+='<div class="notice">이 휴대폰에 중국어 음성이 없을 수 있어요. 소리가 안 나면 휴대폰 설정에서 중국어(Chinese) 음성을 설치해 주세요.</div>';
   if(!SR) h+='<div class="notice">이 브라우저는 자동 점수를 지원하지 않아요. 녹음 후 원어민 소리와 비교하고 “스스로 확인”으로 통과하세요. (자동 점수는 휴대폰 Chrome에서 가장 잘 됩니다.)</div>';
   else if(isPhone) h+='<div class="notice">휴대폰에서는 말하기 점수를 위해 음성 인식을 먼저 씁니다. 카카오톡 등이 아니라 Chrome(안드로이드) 또는 Safari(아이폰)로 열어 주세요. 내 소리·비교하기 파일은 PC에서 함께 저장됩니다.</div>';
-    h+='<details class="help"><summary>마이크 허용 창이 자꾸 뜨나요?</summary><ul><li>창이 뜨면 “이번에만”이 아니라 “허용”(방문 중 허용)을 고르세요.</li><li>안드로이드 Chrome: 주소창 왼쪽 아이콘 → 권한 → 마이크 → 허용</li><li>아이폰 Safari: 주소창 aA → 웹사이트 설정 → 마이크 → 허용</li><li>카카오톡 같은 앱 안에서 열면 허용이 저장되지 않을 수 있어요. “다른 브라우저로 열기”로 Chrome이나 Safari에서 여세요.</li></ul></details>';
-  return h+textHelpHTML()+listHTML(l,k);
+  h+= k==='p' ? '' : '<p class="sub">① 듣기 → ② 말하기 → ③ 비교하기 순서로 해 보세요. 점수가 기준 이상이거나 스스로 확인하면 통과입니다.'+(arr.some(s=>String(s.zh).includes('\n'))?' 질문과 대답을 이어서 말해 보세요.':'')+'</p>';
+  h+='<details class="help"><summary>마이크 허용 창이 자꾸 뜨나요?</summary><ul><li>창이 뜨면 “이번에만”이 아니라 “허용”(방문 중 허용)을 고르세요.</li><li>안드로이드 Chrome: 주소창 왼쪽 아이콘 → 권한 → 마이크 → 허용</li><li>아이폰 Safari: 주소창 aA → 웹사이트 설정 → 마이크 → 허용</li><li>카카오톡 같은 앱 안에서 열면 허용이 저장되지 않을 수 있어요. “다른 브라우저로 열기”로 Chrome이나 Safari에서 여세요.</li></ul></details>';
+  return h+(k==='p'?textHelpHTML():'')+listHTML(l,k);
 }
 function renderView(){
   const l=lesson(), d=D(l.id); let h='';
@@ -1694,7 +1442,7 @@ function renderView(){
           return '<button class="o '+cls+'" data-act="vans" data-q="'+i+'" data-o="'+oi+'">'+esc(l.vocab[oi].ko)+'</button>';
         }).join('')+'</div>';
       });
-      if(vocabDone(l)){ const H=histText(l); h+='<p><b>'+esc(T.result(vocabScore(l),n,vocabPct(l)))+'</b><br><span class="small">'+esc(T.tries(H.count,H.text))+'</span></p><button class="reset" data-act="vreset">'+esc(T.retry)+'</button>'; }
+      if(vocabDone(l)) h+='<p><b>'+esc(T.result(vocabScore(l),n,vocabPass(l)))+'</b></p><button class="reset" data-act="vreset">'+esc(T.retry)+'</button>';
       h+='</div>';
     }
   }
@@ -1728,7 +1476,7 @@ function renderView(){
       });
     });
     if(!l.sentences.length) todo.push('본문은 준비 중이에요');
-    if(!vocabDone(l)) todo.push('단어퀴즈를 끝내세요');
+    if(!vocabPass(l)) todo.push(vocabDone(l)?'단어 단어퀴즈  (다시 풀기)':'단어 단어퀴즈를 끝내세요');
     if(!quizDone(l)) todo.push('퀴즈를 모두 풀어 주세요');
     else l.quiz.forEach((q,qi)=>{ if(d.quiz[qi]!==q.a) todo.push('퀴즈 '+(qi+1)+'번 다시 보기'); });
     const helpHTML=helpItems.length?
@@ -1740,8 +1488,7 @@ function renderView(){
     h+=submitGuideHTML()+
       '<div class="card2"><div class="stamp '+(ok?'':'no')+'"><b>'+(ok?'통과 PASS ✔':'진행 중')+'</b><span>'+esc(l.title)+(l.level?' ('+esc(l.level)+')':'')+'</span></div>'+
       '<div class="kv"><span>이름</span><span>'+esc(S.name||'(이름을 위에 입력하세요)')+'</span></div>'+
-      '<div class="kv"><span>단어퀴즈</span><span>'+(l.vocab.length?(vocabDone(l)?vocabScore(l)+' / '+l.vocab.length+' 맞힘 ('+vocabPct(l)+'%)':'미완료'):'-')+'</span></div>'+
-      (l.vocab.length && vocabDone(l)?'<div class="kv"><span>단어퀴즈 시도</span><span>'+histText(l).count+'회 ('+esc(histText(l).text)+')</span></div>':'')+
+      '<div class="kv"><span>단어</span><span>'+(l.vocab.length?(vocabDone(l)?vocabScore(l)+' / '+l.vocab.length:'미완료'):'-')+'</span></div>'+
       rows+
       '<div class="kv"><span>퀴즈</span><span>'+(l.quiz.length?(quizDone(l)?quizScore(l)+' / '+l.quiz.length:'미완료'):'-')+'</span></div>'+
       '<div class="kv"><span>일시</span><span>'+esc(new Date().toLocaleString('ko-KR'))+'</span></div>'+
@@ -1754,27 +1501,12 @@ function renderView(){
 function render(){ renderTabs(); renderChips(); renderView(); }
 
 /* ----- 이벤트 ----- */
-const NAME_PH='이름 / Name / Tên / Нэр';
-function syncNameUI(){
-  const has=!!(S.name||'').trim();
-  if(has){ $('name').classList.remove('need'); $('name').placeholder=NAME_PH; }
-}
-/* 이름이 비어 있으면 말하기·퀴즈를 막고 이름 칸에 안내를 보여 줍니다 */
-function needName(){
-  if(S.name && S.nameDate!==todayStr()){ S.name=''; S.nameDate=''; $('name').value=''; save(); }
-  if((S.name||'').trim()) return false;
-  const n=$('name'); n.classList.add('need'); n.placeholder='이름을 먼저 입력하세요';
-  window.scrollTo(0,0); try{ n.focus(); }catch(e){}
-  return true;
-}
 $('name').value=S.name||'';
-syncNameUI();
-$('name').addEventListener('input',e=>{ S.name=e.target.value; S.nameDate=(S.name.trim()?todayStr():''); save(); syncNameUI(); });
+$('name').addEventListener('input',e=>{ S.name=e.target.value; save(); });
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]'); if(!b||b.disabled) return;
   const a=b.dataset.act, l=lesson(), i=+b.dataset.i, k=b.dataset.k, d=D(l.id);
-  if(['rec','wrec','vans','ans','qopen'].includes(a) && needName()) return;
-  if(a==='tab'){ if(wcur) stopWord(); S.tab=b.dataset.id; if(S.tab!=='practice') releaseMic(); save(); render(); window.scrollTo(0,0); }
+  if(a==='tab'){ if(wcur) stopWord(); S.tab=b.dataset.id; if(S.tab!=='practice' && S.tab!=='exercise') releaseMic(); save(); render(); window.scrollTo(0,0); }
   else if(a==='lesson'){ if(cur) stopRec(); if(wcur) stopWord(); S.lesson=b.dataset.id; save(); render(); }
   else if(a==='lang'){ S.lang=b.dataset.id; save(); renderChips(); renderView(); }
   else if(a==='say'){ playRef(items(l,k)[i], +b.dataset.r); }
@@ -1791,7 +1523,7 @@ document.addEventListener('click',e=>{
   else if(a==='wstop'){ stopWord(); }
   else if(a==='wmine'){ playMine(l.id+':v:'+i); }
   else if(a==='wcmp'){ const key=l.id+':v:'+i; if(!playRef(l.vocab[i],0.9,()=>setTimeout(()=>playMine(key),300))) playMine(key); }
-  else if(a==='vans'){ const q=+b.dataset.q; if(d.vq[q]==null){ d.vq[q]=+b.dataset.o; if(vocabDone(l)) d.vh.push(vocabScore(l)); save(); renderView(); renderChips(); } }
+  else if(a==='vans'){ const q=+b.dataset.q; if(d.vq[q]==null){ d.vq[q]=+b.dataset.o; save(); renderView(); renderChips(); } }
   else if(a==='vreset'){ d.vq={}; save(); renderView(); renderChips(); }
 });
 render();
