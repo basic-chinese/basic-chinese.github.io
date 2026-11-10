@@ -1389,8 +1389,9 @@ function textCompare(l,i){
   if(!playRef(l.sentences[i],1,()=>setTimeout(mine,300))) mine();
 }
 function renderCard(k,i){
-  const l=lesson();
+  const y=window.scrollY, l=lesson();
   const el=$('c'+k+i); if(el) el.outerHTML=cardHTML(l,k,i);
+  window.scrollTo(0,y);
 }
 function listHTML(l,k){
   return items(l,k).map((_,i)=>cardHTML(l,k,i)).join('');
@@ -1433,8 +1434,6 @@ function renderChips(){
     const done=lessonPass(l), gt=cardTotals(l);
     return '<button class="chip '+(l.id===S.lesson?'on':'')+(done?' done':'')+'" data-act="lesson" data-id="'+l.id+'"><b>'+esc(LT(l))+'</b><span>'+(l.draft?CT.prep:(l.sentences.length?(l.level?esc(l.level)+' · ':'')+(done?CT.done:CT.sent+' '+gt[0]+'/'+gt[1]):CT.wf))+'</span></button>';
   }).join('');
-  const activeChip=$('chips').querySelector('.chip.on');
-  if(activeChip) activeChip.scrollIntoView({block:'nearest',inline:'center'});
   $('langs').innerHTML=Object.keys(LANGS).map(k=>'<button class="lg '+(S.lang===k?'on':'')+'" data-act="lang" data-id="'+k+'">'+LANGS[k]+'</button>').join('');
 }
 
@@ -1729,7 +1728,7 @@ function markWordDone(lid,i){
   const d=D(lid); d.wdone[i]=true; d.wever[i]=true; d.wseq[i]={listen:false,speak:false}; save();
   if(lesson().id===lid && S.tab==='vocab'){ renderWord(i); updGate(); renderTabs(); }
 }
-function renderWord(i){ const l=lesson(), el=$('vw'+i); if(el && l.vocab[i]) el.outerHTML=vwHTML(l,i); }
+function renderWord(i){ const y=window.scrollY, l=lesson(), el=$('vw'+i); if(el && l.vocab[i]) el.outerHTML=vwHTML(l,i); window.scrollTo(0,y); }
 async function startWord(i){
   if(wcur||tcur) return;
   const l=lesson(), key=l.id+':v:'+i;
@@ -1942,6 +1941,34 @@ function practiceStartText(d){
   return t;
 }
 function render(){ renderTabs(); renderChips(); renderView(); }
+/* 단어 영역을 다시 그릴 때 현재 작업 위치 유지 */
+function renderVocabKeepScroll(){
+  const y=window.scrollY;
+  renderView();
+  renderChips();
+  window.scrollTo(0,y);
+}
+/* 본문 영역을 다시 그릴 때 현재 작업 위치 유지 */
+function renderPracticeKeepScroll(){
+  const y=window.scrollY;
+  renderView();
+  renderChips();
+  renderTabs();
+  window.scrollTo(0,y);
+}
+/* 하단 퀴즈 영역을 다시 그릴 때 현재 작업 위치 유지 */
+function renderQuizKeepScroll(){
+  const y=window.scrollY;
+  renderView();
+  renderChips();
+  renderTabs();
+  window.scrollTo(0,y);
+}
+/* 리셋 후 해당 영역의 첫 항목으로 이동 */
+function scrollToFirstItem(selector){
+  const el=document.querySelector(selector);
+  if(el) el.scrollIntoView({block:'start'});
+}
 
 /* ----- 이벤트 ----- */
 const NAME_PH='이름 / Name';
@@ -2025,7 +2052,7 @@ document.addEventListener('click',e=>{
       if(audioURL[key]){ try{ URL.revokeObjectURL(audioURL[key]); }catch(e){} delete audioURL[key]; }
       delete msg[key];
     });
-    save(); renderView(); renderChips(); renderTabs();
+    save(); renderPracticeKeepScroll(); scrollToFirstItem('#cp0');
   }
   else if(a==='wreset'){
     if(wcur){ alert(RTX().rec); return; }
@@ -2037,20 +2064,20 @@ document.addEventListener('click',e=>{
       if(audioURL[key]){ try{ URL.revokeObjectURL(audioURL[key]); }catch(e){} delete audioURL[key]; }
       delete wmsg[key];
     });
-    save(); renderView(); renderChips();
+    save(); renderVocabKeepScroll();
   }
-  else if(a==='qplay'){ const q=+b.dataset.q; const item=l.quiz[q]; if(item && item.au){ const sent=l.sentences.find(x=>x.au===item.au); if(sent) playRef(sent,1,()=>{ d.qheard[q]=true; save(); if(S.lesson===l.id && S.tab==='quiz') renderView(); }); } }
-  else if(a==='ans'){ const q=+b.dataset.q, item=l.quiz[q]; if(item && item.type==='listen' && !d.qheard[q]){ alert(TM().hear); return; } if(d.quiz[q]==null){ d.quiz[q]=+b.dataset.o; if(quizDone(l)){ d.qh.push(quizScore(l)); d.qw[d.qh.length-1]=quizWrong(l); } save(); renderView(); renderChips(); renderTabs(); } }
-  else if(a==='checkSentence'){ const i=+b.dataset.i, v=b.dataset.value; if(!d.check.history[i]){ d.check.history[i]=[]; if(d.check.sentences[i]) d.check.history[i].push(d.check.sentences[i]); } d.check.sentences[i]=v; d.check.history[i].push(v); save(); renderView(); renderTabs(); }
-  else if(a==='quizreset'){ if(!confirm(TM().qall)) return; d.quiz={}; d.qperm={}; d.qheard={}; save(); renderView(); renderTabs(); renderChips(); }
+  else if(a==='qplay'){ const q=+b.dataset.q; const item=l.quiz[q]; if(item && item.au){ const sent=l.sentences.find(x=>x.au===item.au); if(sent) playRef(sent,1,()=>{ d.qheard[q]=true; save(); if(S.lesson===l.id && S.tab==='quiz') renderQuizKeepScroll(); }); } }
+  else if(a==='ans'){ const q=+b.dataset.q, item=l.quiz[q]; if(item && item.type==='listen' && !d.qheard[q]){ alert(TM().hear); return; } if(d.quiz[q]==null){ d.quiz[q]=+b.dataset.o; if(quizDone(l)){ d.qh.push(quizScore(l)); d.qw[d.qh.length-1]=quizWrong(l); } save(); renderQuizKeepScroll(); } }
+  else if(a==='checkSentence'){ const i=+b.dataset.i, v=b.dataset.value; if(!d.check.history[i]){ d.check.history[i]=[]; if(d.check.sentences[i]) d.check.history[i].push(d.check.sentences[i]); } d.check.sentences[i]=v; d.check.history[i].push(v); save(); renderPracticeKeepScroll(); }
+  else if(a==='quizreset'){ if(!confirm(TM().qall)) return; d.quiz={}; d.qperm={}; d.qheard={}; save(); renderQuizKeepScroll(); scrollToFirstItem('#view .card2 .q'); }
   else if(a==='vsay'){ playVocab(b, l.vocab[i], 1, ()=>{ if(lessonWindow(l.id)!=='open') return; const ws=wsq(l.id,i); if(ws.listen) return; ws.listen=true; save(); if(lesson().id===l.id && S.tab==='vocab') renderWord(i); }); }
   else if(a==='qopen'){ if(wordsDoneCount(l)>=l.vocab.length){ d.qopen=true; vqClosed=false; save(); renderView(); const q=$('vquiz'); if(q) q.scrollIntoView({block:'start'}); } }
   else if(a==='wrec'){ startWord(i); }
   else if(a==='wstop'){ stopWord(); }
   else if(a==='wmine'){ playMine(l.id+':v:'+i); }
   else if(a==='wcmp'){ wordCompare(l,i); }
-  else if(a==='vans'){ const q=+b.dataset.q; if(d.vq[q]==null){ d.vq[q]=+b.dataset.o; if(vocabDone(l)) d.vh.push(vocabScore(l)); save(); renderView(); renderChips(); renderTabs(); } }
-  else if(a==='vreset'){ if(!confirm(TM().vall)) return; d.vq={}; delete d.vqs; save(); renderView(); renderChips(); }
+  else if(a==='vans'){ const q=+b.dataset.q; if(d.vq[q]==null){ d.vq[q]=+b.dataset.o; if(vocabDone(l)) d.vh.push(vocabScore(l)); save(); renderVocabKeepScroll(); renderTabs(); } }
+  else if(a==='vreset'){ if(!confirm(TM().vall)) return; d.vq={}; delete d.vqs; save(); renderVocabKeepScroll(); scrollToFirstItem('#vquiz .q'); }
 });
 /* 앱을 열 때 이번 주의 첫 과를 보여 줍니다. 10/27(화)부터 7일 단위로 2과씩 (11·13·15·17·19과). 10/27 이전은 11과, 마지막 주 이후는 19과 */
 const WEEK_START='2026-10-27', WEEK_FIRST=['l11','l13','l15','l17','l19'];
