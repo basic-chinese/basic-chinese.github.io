@@ -1433,6 +1433,8 @@ function renderChips(){
     const done=lessonPass(l), gt=cardTotals(l);
     return '<button class="chip '+(l.id===S.lesson?'on':'')+(done?' done':'')+'" data-act="lesson" data-id="'+l.id+'"><b>'+esc(LT(l))+'</b><span>'+(l.draft?CT.prep:(l.sentences.length?(l.level?esc(l.level)+' · ':'')+(done?CT.done:CT.sent+' '+gt[0]+'/'+gt[1]):CT.wf))+'</span></button>';
   }).join('');
+  const activeChip=$('chips').querySelector('.chip.on');
+  if(activeChip) activeChip.scrollIntoView({block:'nearest',inline:'center'});
   $('langs').innerHTML=Object.keys(LANGS).map(k=>'<button class="lg '+(S.lang===k?'on':'')+'" data-act="lang" data-id="'+k+'">'+LANGS[k]+'</button>').join('');
 }
 
