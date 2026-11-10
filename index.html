@@ -2068,7 +2068,7 @@ document.addEventListener('click',e=>{
       if(audioURL[key]){ try{ URL.revokeObjectURL(audioURL[key]); }catch(e){} delete audioURL[key]; }
       delete wmsg[key];
     });
-    save(); renderVocabKeepScroll();
+    save(); renderVocabKeepScroll(); scrollToFirstItem('#vw0');
   }
   else if(a==='qplay'){ const q=+b.dataset.q; const item=l.quiz[q]; if(item && item.au){ const sent=l.sentences.find(x=>x.au===item.au); if(sent) playRef(sent,1,()=>{ d.qheard[q]=true; save(); if(S.lesson===l.id && S.tab==='quiz') renderQuizKeepScroll(); }); } }
   else if(a==='ans'){ const q=+b.dataset.q, item=l.quiz[q]; if(item && item.type==='listen' && !d.qheard[q]){ alert(TM().hear); return; } if(d.quiz[q]==null){ d.quiz[q]=+b.dataset.o; if(quizDone(l)){ d.qh.push(quizScore(l)); d.qw[d.qh.length-1]=quizWrong(l); } save(); renderQuizKeepScroll(); } }
