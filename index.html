@@ -1004,7 +1004,8 @@ function D(id){
   if(!d.qheard) d.qheard={};
   if(!d.check) d.check={sentences:{}};
   if(!d.check.sentences) d.check.sentences={};
-  if(d.check.locked==null) d.check.locked=false;
+  d.check.locked=false;
+  if(!d.check.history) d.check.history={};
   if(!d.vq) d.vq={};
   if(!d.wseq) d.wseq={};
   if(!d.vh) d.vh=[];
@@ -1887,7 +1888,7 @@ function renderView(){
     l.sentences.forEach((q,i)=>{
       const val=c.sentences[i]||'';
       const opts=[['confident',t.confident],['normal',t.normal],['difficult',t.difficult]];
-      h+='<div class="checkrow"><div><b>'+(i+1)+'.</b> <span class="checksentence" lang="zh-CN">'+esc(q.zh||'')+'</span></div>'+(q.py?'<div class="checkpy">'+esc(q.py)+'</div>':'')+(q.ko?'<div class="checkko">'+esc(q.ko)+'</div>':'')+'<div class="checkopts">'+opts.map(o=>'<button class="checkopt '+(val===o[0]?'sel':'')+'" data-act="checkSentence" data-i="'+i+'" data-value="'+o[0]+'" aria-pressed="'+(val===o[0])+'"'+(c.locked?' disabled':'')+'>'+esc(o[1])+'</button>').join('')+'</div></div>';
+      h+='<div class="checkrow"><div><b>'+(i+1)+'.</b> <span class="checksentence" lang="zh-CN">'+esc(q.zh||'')+'</span></div>'+(q.py?'<div class="checkpy">'+esc(q.py)+'</div>':'')+(q.ko?'<div class="checkko">'+esc(q.ko)+'</div>':'')+'<div class="checkopts">'+opts.map(o=>'<button class="checkopt '+(val===o[0]?'sel':'')+'" data-act="checkSentence" data-i="'+i+'" data-value="'+o[0]+'" aria-pressed="'+(val===o[0])+'"'+'>'+esc(o[1])+'</button>').join('')+'</div></div>';
     });
     h+='</div>';
     if(!complete) h+='<div class="notice">'+esc(t.required)+'</div>';
@@ -1925,8 +1926,10 @@ function renderView(){
 function submitSentenceLine(q,i,d){
   const dp=d.p||{}, said=(dp.tc||{})[i]||0, silent=(dp.nv||{})[i]||0, mic=(dp.me||{})[i]||0;
   const notes=[]; if(silent>0) notes.push('무음 '+silent); if(mic>0) notes.push(mic>1?'마이크 오류 '+mic:'마이크 오류');
-  const conf={confident:'굿',normal:'보통',difficult:'어려움'}[d.check.sentences[i]]||'미선택';
-  return '<li>'+esc(q.zh||'')+': 말 '+said+(notes.length?'('+notes.join(', ')+')':'')+', '+conf+'</li>';
+  const labels={confident:'굿',normal:'보통',difficult:'어려움'};
+  const history=((d.check.history||{})[i]||[]).map(v=>labels[v]||v);
+  const conf=history.length?history.join(' / '):(labels[d.check.sentences[i]]||'미선택');
+  return '<li>'+esc(q.zh||'')+': 말 '+said+(notes.length?'('+notes.join(', ')+')':'')+' · '+esc(conf)+'</li>';
 }
 function practiceStartText(d){
   const pt=d.pt; if(!pt||!pt.f) return '기록 없음';
@@ -1990,7 +1993,6 @@ document.addEventListener('click',e=>{
       save(); render(); window.scrollTo(0,0); return;
     }
     if(wcur) stopWord(); if(tcur) stopTextRecording();
-    if(target==='card' && !d.check.locked){ d.check.locked=true; }
     S.tab=target; if(S.tab!=='practice' && !tcur && !wcur) releaseMic(); save(); render(); window.scrollTo(0,0);
   }
   else if(a==='lesson'){ userPicked=true; if(wcur) stopWord(); if(tcur) stopTextRecording(); S.lesson=b.dataset.id; S.tab='vocab'; save(); render(); }
@@ -2037,7 +2039,7 @@ document.addEventListener('click',e=>{
   }
   else if(a==='qplay'){ const q=+b.dataset.q; const item=l.quiz[q]; if(item && item.au){ const sent=l.sentences.find(x=>x.au===item.au); if(sent) playRef(sent,1,()=>{ d.qheard[q]=true; save(); if(S.lesson===l.id && S.tab==='quiz') renderView(); }); } }
   else if(a==='ans'){ const q=+b.dataset.q, item=l.quiz[q]; if(item && item.type==='listen' && !d.qheard[q]){ alert(TM().hear); return; } if(d.quiz[q]==null){ d.quiz[q]=+b.dataset.o; if(quizDone(l)){ d.qh.push(quizScore(l)); d.qw[d.qh.length-1]=quizWrong(l); } save(); renderView(); renderChips(); renderTabs(); } }
-  else if(a==='checkSentence'){ if(d.check.locked) return; d.check.sentences[+b.dataset.i]=b.dataset.value; save(); renderView(); renderTabs(); }
+  else if(a==='checkSentence'){ const i=+b.dataset.i, v=b.dataset.value; if(!d.check.history[i]){ d.check.history[i]=[]; if(d.check.sentences[i]) d.check.history[i].push(d.check.sentences[i]); } d.check.sentences[i]=v; d.check.history[i].push(v); save(); renderView(); renderTabs(); }
   else if(a==='quizreset'){ if(!confirm(TM().qall)) return; d.quiz={}; d.qperm={}; d.qheard={}; save(); renderView(); renderTabs(); renderChips(); }
   else if(a==='vsay'){ playVocab(b, l.vocab[i], 1, ()=>{ if(lessonWindow(l.id)!=='open') return; const ws=wsq(l.id,i); if(ws.listen) return; ws.listen=true; save(); if(lesson().id===l.id && S.tab==='vocab') renderWord(i); }); }
   else if(a==='qopen'){ if(wordsDoneCount(l)>=l.vocab.length){ d.qopen=true; vqClosed=false; save(); renderView(); const q=$('vquiz'); if(q) q.scrollIntoView({block:'start'}); } }
@@ -2048,8 +2050,8 @@ document.addEventListener('click',e=>{
   else if(a==='vans'){ const q=+b.dataset.q; if(d.vq[q]==null){ d.vq[q]=+b.dataset.o; if(vocabDone(l)) d.vh.push(vocabScore(l)); save(); renderView(); renderChips(); renderTabs(); } }
   else if(a==='vreset'){ if(!confirm(TM().vall)) return; d.vq={}; delete d.vqs; save(); renderView(); renderChips(); }
 });
-/* 앱을 열 때 이번 주의 첫 과를 보여 줍니다. 10/28(수)부터 7일 단위로 2과씩 (11·13·15·17·19과). 10/28 이전은 11과, 마지막 주 이후는 19과 */
-const WEEK_START='2026-10-28', WEEK_FIRST=['l11','l13','l15','l17','l19'];
+/* 앱을 열 때 이번 주의 첫 과를 보여 줍니다. 10/27(화)부터 7일 단위로 2과씩 (11·13·15·17·19과). 10/27 이전은 11과, 마지막 주 이후는 19과 */
+const WEEK_START='2026-10-27', WEEK_FIRST=['l11','l13','l15','l17','l19'];
 let userPicked=false;
 function applyWeekLesson(){
   if(userPicked || wcur||tcur) return;
