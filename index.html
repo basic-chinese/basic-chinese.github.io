@@ -2079,8 +2079,8 @@ document.addEventListener('click',e=>{
   else if(a==='vans'){ const q=+b.dataset.q; if(d.vq[q]==null){ d.vq[q]=+b.dataset.o; if(vocabDone(l)) d.vh.push(vocabScore(l)); save(); renderVocabKeepScroll(); renderTabs(); } }
   else if(a==='vreset'){ if(!confirm(TM().vall)) return; d.vq={}; delete d.vqs; save(); renderVocabKeepScroll(); scrollToFirstItem('#vquiz .q'); }
 });
-/* 앱을 열 때 이번 주의 첫 과를 보여 줍니다. 10/27(화)부터 7일 단위로 2과씩 (11·13·15·17·19과). 10/27 이전은 11과, 마지막 주 이후는 19과 */
-const WEEK_START='2026-10-27', WEEK_FIRST=['l11','l13','l15','l17','l19'];
+/* 앱을 열 때 이번 주의 첫 과를 보여 줍니다. 10/28(수)부터 7일 단위로 2과씩 (11·13·15·17·19과). 10/28 이전은 11과, 마지막 주 이후는 19과 */
+const WEEK_START='2026-10-28', WEEK_FIRST=['l11','l13','l15','l17','l19'];
 let userPicked=false;
 function applyWeekLesson(){
   if(userPicked || wcur||tcur) return;
